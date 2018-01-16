@@ -2,9 +2,9 @@
 #define maxOp 245
 #define minOp 10
 #define kp 1
-#define ki 0.5
-#define kd 0.5
-long rpm, x, pret, avgver, setRpm = 44, diff = 1;
+#define ki 0.79
+#define kd 0.98
+long rpm, x, pret, avgver, setRpm = 50 ,diff = 1;
 uint8_t pwmOut;
 
 AutoPID pid(&avgver, &setRpm, &pwmOut, minOp, maxOp, kp, ki, kd);
@@ -26,12 +26,7 @@ void isr1() {
   f = time1 - time2;
   dt = abs(f);
 }
-ISR(TIMER2_OVF_vect) {
-  count++
-  if (count % 7 == 0) {
-    PORTD &= PORTB;
-  }
-}
+
 void setup() {
   pinMode(7, OUTPUT);
   pinMode(9, 1);
@@ -43,10 +38,8 @@ void setup() {
   TCCR1B = 0b00000001;
   OCR1A = 0;
   OCR1B = 0;
-  flashLed();
-  TCCR2A = 0b00000000;
-  TCCR2B = 0b00000111;
-  TIMSK2 |= (1 << TOIE2);
+   flashLed();
+
 }
 
 void loop() {
@@ -58,16 +51,10 @@ void loop() {
     //pret=x;
   }
   pid.run();
-  if (setRpm > 0) {
-    OCR1A = pwmOut;
-    OCR1B = 0;
-  } else if (setRpm < 0) {
-    OCR1B = pwmOut;
-    OCR1A = 0;
-  } else {
-    OCR1B = 0;
-    OCR1A = 0;
-  }
+
+  OCR1A = pwmOut;
+  OCR1B = 0;
+
 }
 long runningAverage(int M) {
 #define LM_SIZE 64
@@ -89,15 +76,15 @@ long runningAverage(int M) {
 void flashLed() {
   pinMode(7, OUTPUT);
   digitalWrite(7, HIGH);
-  delay(200);
+  delay(500);
   digitalWrite(7, LOW);
-  delay(200);
-  digitalWrite(7, HIGH);
-  delay(200);
-  digitalWrite(7, LOW);
-  delay(200);
+  delay(500);
   digitalWrite(7, HIGH);
   delay(500);
+  digitalWrite(7, LOW);
+  delay(500);
+  digitalWrite(7, HIGH);
+  delay(1000);
   digitalWrite(7, LOW);
   delay(200);
 }
