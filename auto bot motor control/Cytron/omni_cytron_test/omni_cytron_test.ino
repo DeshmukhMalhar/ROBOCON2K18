@@ -9,7 +9,7 @@ bool junction = false;
 //Reading values of cytron
 uint8_t cytron_read;
 
-//Keep the count of the junc
+//Keep the count of the junction
 int junction_counter = 0;
 
 //motor pwms
@@ -284,13 +284,9 @@ void setup() {
 }
 
 void loop() {
-    set_speed();
-    print_cytron();
-
     if (current == 1 && next == 2) {
         //Serial.print("If current1 and next 2");
         forward();
-        print_cytron();
         set_speed();
         //Serial.println("In case 1");
         // Serial.println(junction);
@@ -298,11 +294,7 @@ void loop() {
             //Serial.println("adj_out");
             adj_out();
             set_speed();
-            print_cytron();
-
         }
-        //Serial.println("forward while");
-
         current = 2;
         next = 4;
         junction_counter = 0;
