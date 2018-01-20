@@ -287,27 +287,23 @@ void loop() {
     if (current == 1 && next == 2) {
         //Serial.print("If current1 and next 2");
         forward();
-        set_speed();
         //Serial.println("In case 1");
         // Serial.println(junction);
         while (junction != true) {
             //Serial.println("adj_out");
             adj_out();
-            set_speed();
         }
         current = 2;
         next = 4;
         junction_counter = 0;
     } else if (current == 2 && next == 4) {
         //Serial.print("If current2 and next 4");
-        left();
 
         velocity[2] = 0;
         velocity[3] = 0;
         velocity[6] = 0;
         velocity[7] = 0;
-        set_speed();
-
+        left();
         while (junction_counter != 2) {
             //Serial.println("in case 2 while");
             adj_zone();
