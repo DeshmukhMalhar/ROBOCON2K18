@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 //const int out1 = 1, out2 = 2, out3 = 3, tz1 = 4, tz2 = 5, tz3 = 6;
-int current = 0, next = 0;
+int8_t current = 0, next = 0;
 
 //shows junction is present or not
 bool junction = false;
@@ -16,17 +16,18 @@ int junction_counter = 0;
 uint8_t low = 17, medium = 22, high = 23, normal = 70;
 
 //offset
-int8_t offset_normal[] = {0, 0, -10, -10, 5, 5, 0, 0};
-int8_t offset_adj[] = {0, 0, -6, -6, 4, 4, 0, 0};
+int8_t offset_normal[] = {0, 0, 0, 0, 0, 0, normal/10, normal/10};
+int8_t offset_adj[] = {0, 0, 0, 0, 0, 0, 8, 8};
 
 //To Mosfet - Each cuople for 1 motor (1,0-Forward)(0,1-Backward)
-uint8_t motor_pins[] = {2, 3, 4, 5, 6, 7, 10, 11};
+//uint8_t motor_pins[] = {2, 3, 4, 5, 6, 7, 10, 11};
+uint8_t motor_pins[] = {10, 11, 3, 2, 4, 5, 7, 6};
 
 //ASSIGNING SPEED TO THE MOTORS
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 void print_cytron() {
-    //Serial.println(PINC, BIN);
+    Serial.println(PINC, BIN);
 }
 
 const bool junction_condition[] = {false, false, false, false, false, false, false, false, false, false, true, false,
@@ -48,7 +49,8 @@ const bool junction_condition[] = {false, false, false, false, false, false, fal
                                    true, false, true, false, true, false, true, false, true, false, true, false, true,
                                    false, true, false, true, false, true, false, false, false, true, false, true, false,
                                    true, false, true, false, true, false, true, false, true, false, false, false, true,
-                                   false, true, false, true, false, true, false, true, false, true, false, true, false};
+                                   false, true, false, true, false, true, false, true, false, true, false, true, false
+};
 
 void set_speed() {
     for (int i = 0; i < 8; i++) {
@@ -67,14 +69,11 @@ void initialization() {
     }
 }
 
-int counter = 0;
+uint8_t counter = 0;
 
 bool is_junction() {
     cytron_read = PINC;
-    if (junction_condition[cytron_read] == true) {
-        return true;
-    }
-    return false;
+    return junction_condition[cytron_read];
 }
 
 
@@ -85,7 +84,7 @@ void shuttle_throw() {
 //Vertical adjsutment of bot
 void adj_out() {
     cytron_read = PINC;
-//    print_cytron();
+    //    print_cytron();
     //Serial.print("in adj out");
 
 
@@ -99,7 +98,6 @@ void adj_out() {
         velocity[4] = 0;
         velocity[5] = low;  //motor 3
         //Serial.println("small left");
-
     }
         //medium left
     else if ((cytron_read | B00100000) == B11100000) {
@@ -284,10 +282,13 @@ void setup() {
 }
 
 void loop() {
+//  while (true) {
+//    print_cytron();
+//  }
     if (current == 1 && next == 2) {
-        //Serial.print("If current1 and next 2");
+        Serial.print("If current1 and next 2");
         forward();
-        //Serial.println("In case 1");
+//        Serial.println("In case 1");
         // Serial.println(junction);
         while (junction != true) {
             //Serial.println("adj_out");
@@ -297,7 +298,7 @@ void loop() {
         next = 4;
         junction_counter = 0;
     } else if (current == 2 && next == 4) {
-        //Serial.print("If current2 and next 4");
+        Serial.print("If current2 and next 4");
 
         velocity[2] = 0;
         velocity[3] = 0;
@@ -305,7 +306,7 @@ void loop() {
         velocity[7] = 0;
         left();
         while (junction_counter != 2) {
-            //Serial.println("in case 2 while");
+            Serial.println("in case 2 while");
             adj_zone();
         }
         stop1();
@@ -313,7 +314,7 @@ void loop() {
         current = 4;
         next = 2;
     } else if (current == 4 && next == 2) {
-        //Serial.print("If current4 and next 2");
+        Serial.print("If current4 and next 2");
         right();
         while (junction != true) {
             adj_zone();
@@ -383,3 +384,4 @@ void loop() {
 
 
 }
+
