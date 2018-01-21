@@ -80,6 +80,7 @@ void loop() {
   //if,data is arrived on I2C,store it in a non Volatile variable
   if (haveData) {
     rpmIN = data;
+	setRpm=abs(rpmIN);
     haveData = false;
 #ifdef DEBUG
     Serial.print("Got rpm:");
