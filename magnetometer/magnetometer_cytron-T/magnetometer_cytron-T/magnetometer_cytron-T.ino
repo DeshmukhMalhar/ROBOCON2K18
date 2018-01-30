@@ -32,6 +32,11 @@ void initt() {
     }
 }
 
+void shuttle_throw() {
+
+    delay(2000);
+}
+
 void printSensor() {
     Serial.print("Sensor 1 =");
     Serial.println(PINC, BIN);
@@ -193,7 +198,6 @@ void adj_out() {
         velocity[1] = high;  //motor 1
         velocity[4] = 0;
         velocity[5] = high;  //motor 3
-        //    ////Serial.println("large left");
     }
 
         //RIGHT adj
@@ -203,7 +207,6 @@ void adj_out() {
         velocity[1] = 0;
         velocity[4] = low;
         velocity[5] = 0;  //motor 3
-        //    ////Serial.println("small right");
     }
 
         //medium right
@@ -212,7 +215,6 @@ void adj_out() {
         velocity[1] = 0;
         velocity[4] = medium;
         velocity[5] = 0;     //motor 3
-        //    ////Serial.println("medium right");
     }
         //large right
     else if ((sensor1 | B00000010) == B00000011) {
@@ -220,7 +222,6 @@ void adj_out() {
         velocity[1] = 0;
         velocity[4] = high;
         velocity[5] = 0;  //motor 3
-        //    ////Serial.println("large right");
     }
 
     if (is_junction_out()) {
@@ -341,6 +342,12 @@ void adj_zone() {
     set_speed_zone();
 }
 
+void set_stopper() {
+    for (int i = 0; i < 8; i++) {
+        digitalWrite(motor_pins[i], 0);
+    }
+}
+
 void stop1() {
 
     velocity[0] = 0;
@@ -351,15 +358,11 @@ void stop1() {
     velocity[5] = 0;
     velocity[6] = 0;
     velocity[7] = 0;
-    set_speed_zone();
+    set_stopper();
 }
 
 void setup() {
-    // put your setup code here, to run once:
     initt();
-    //  pinMode(22, OUTPUT);
-    ////Serial.begin(9600);
-    //  //Serial.println("HMC5883 Magnetometer Test"); //Serial.println("");
 
     /* Initialise the sensor */
     if (!mag.begin()) {
@@ -384,7 +387,7 @@ void setup() {
     maximum = headingDegrees;
 
 
-    int currentmillis = millis();
+    long currentmillis = millis();
     while (millis() < currentmillis + 5000) {
 
         sensors_event_t event;
@@ -399,25 +402,12 @@ void setup() {
             heading -= 2 * PI;
         headingDegrees = heading * 180 / M_PI;
 
-        ////Serial.print("Heading (degrees): "); //Serial.println(headingDegrees);
         if (headingDegrees < minimum)
             minimum = headingDegrees;
         else if (headingDegrees > maximum)
             maximum = headingDegrees;
     }
-    ////Serial.println("min=");
-    ////Serial.println(minimum);
     delay(500);
-    ////Serial.println("max=");
-    ////Serial.println(maximum);
-    delay(500);
-
-
-
-    //  digitalWrite(22, HIGH);
-    //
-    //
-    //  digitalWrite(22, LOW);
 }
 
 void loop() {
@@ -427,11 +417,6 @@ void loop() {
         while (junction != true) {
             adj_out();
         }
-        //    while (junction == true) {
-        //      adj_out();
-        //    }
-        //  stop1();
-        //  while(1);
         current = 2;
         next = 4;
         junction_counter = 0;
@@ -441,23 +426,15 @@ void loop() {
         velocity[6] = 0;
         velocity[7] = 0;
         left();
-        //Serial.println(junction_counter);
         while (junction == true) {
             adj_zone();
-            //Serial.println(junction_counter);
         }
         junction_counter = 0;
-        //Serial.println(junction_counter);
         while (junction_counter != 2) {
             adj_zone();
-            //Serial.println(junction_counter);
         }
-        //Serial.println(junction_counter);
         stop1();
-        delay(2000);
-        //    while (1);
-        //    shuttle_throw();
-
+        shuttle_throw();
         current = 4;
         next = 2;
         junction_counter = 0;
@@ -475,8 +452,6 @@ void loop() {
         while (junction_counter != 2) {
             adj_zone();
         }
-        //    stop1();
-        //    while (1);
         current = 2;
         next = 3;
         junction_counter = 0;
@@ -510,7 +485,7 @@ void loop() {
 
         }
         stop1();
-        delay(2000);
+        shuttle_throw();
         current = 5;
         next = 3;
         junction_counter = 0;
@@ -529,7 +504,7 @@ void loop() {
         }
 
         stop1();
-        delay(2000);
+        shuttle_throw();
         current = 3;
         next = 6;
     } else if (current == 3 && next == 6) {
