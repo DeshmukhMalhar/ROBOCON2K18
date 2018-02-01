@@ -13,11 +13,11 @@ uint8_t offset_normal[] = {0, 0, 0, 0, 0, 0, 0, 0};
 float headingDegrees, minimum, maximum, variable;
 float heading, declinationAngle ;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 25, medium = 30, high = 30, normal = 100;
+int low = 27, medium = 30, high = 32, normal = 70;
 uint8_t relayPin = 22;
-
+int previous_state,counter_decider;
 int junction_counter = 0;
-
+int higher = 70;
 bool junction = false;
 
 int current = 1, next = 2;
@@ -39,10 +39,10 @@ void displaySensorDetails(void)
 }
 
 void printSensor() {
-  ////Serial.print("Sensor 1 =");
-  ////Serial.println(PINC, BIN);
-  ////Serial.print("Sensor 2 =");
-  ////Serial.println(PINL, BIN);
+  //  Serial.print("Sensor 1 =");
+  //  Serial.println(PINC, BIN);
+  Serial.print("Sensor 2 =");
+  Serial.println(PINL,  BIN);
 }
 
 
@@ -183,7 +183,7 @@ void set_speed_zone() {
   for (int i = 0; i < 8; i++) {
     //    //Serial.print(velocity[0)
     analogWrite(motor_pins[i],
-                velocity[i] == 0 ? 0 : (velocity[i] == normal ? velocity[i] + corr_velocity[i] : velocity[i]));
+                velocity[i] == 0 ? 0 : (velocity[i] == normal || velocity[i] == higher ? velocity[i] + corr_velocity[i] : velocity[i]));
   }
 
 }
@@ -245,6 +245,12 @@ void adj_out() {
     velocity[5] = 0;  //motor 3
     //    ////Serial.println("large right");
   }
+  else if ((sensor1 == B00011000)) {
+    velocity[0] = 0; //motor 1
+    velocity[1] = 0;
+    velocity[4] = 0;
+    velocity[5] = 0;
+  }
 
   if (is_junction_out()) {
     if (junction == false) {
@@ -287,9 +293,9 @@ void left() {
   mz2 = 0;
   mz4 = 4;
   velocity[0] = 0;
-  velocity[1] = normal;
+  velocity[1] = higher; //normal;
   velocity[4] = 0;
-  velocity[5] = normal;
+  velocity[5] = higher;//normal;
   set_speed_zone();
 }
 
@@ -355,6 +361,12 @@ void adj_zone() {
     velocity[7] = 0;
     velocity[6] = high;  //motor 4
   }
+  else if (sensor2 == B00011000) {
+    velocity[3] = 0; //motor 2
+    velocity[2] = 0;
+    velocity[7] = 0;
+    velocity[6] = 0;
+  }
   if (is_junction_zone()) {
     if (junction == false) {
       junction_counter++;
@@ -382,7 +394,7 @@ void setup() {
   // put your setup code here, to run once:
   initt();
   //  pinMode(22, OUTPUT);
-  ////Serial.begin(9600);
+  Serial.begin(9600);
   //  //Serial.println("HMC5883 Magnetometer Test"); //Serial.println("");
 
   /* Initialise the sensor */
@@ -453,9 +465,9 @@ void loop()
 
   ////Serial.println(PINC,BIN);
   //  //Serial.println(PINL, BIN);
-  //   while(1){
-  //    printSensor();
-  //   }
+  //     while(1){
+  //      printSensor();
+  //     }
 
 
   if (current == 1 && next == 2) {
@@ -468,9 +480,25 @@ void loop()
     //    }
     //  stop1();
     //  while(1);
+    while (junction == true) {
+    if((sensor1 | B00011000) == B01111000||(sensor1 | B00100000) == B11100000||(sensor1 | B01110000) == B11110000||sensor1==B00011000){
+      previous_state=-1;
+    }
+    else {
+      previous_state=1;
+    }
+    
+      adj_out();
+    }
+ 
     current = 2;
+
     next = 4;
+
     junction_counter = 0;
+
+
+
   }
 
   else if (current == 2 && next == 4) {
@@ -478,22 +506,29 @@ void loop()
     velocity[3] = 0;
     velocity[6] = 0;
     velocity[7] = 0;
+    if(previous_state==-1){
+      counter_decider=2;
+    }
+    else if(previous_state==1){
+      counter_decider=3;
+    }
     left();
     //Serial.println(junction_counter);
-    while (junction == true) {
-      adj_zone();
-      //Serial.println(junction_counter);
-    }
-    junction_counter = 0;
+    adj_zone();
+//    while (junction == true) {
+//      adj_zone();
+//      //Serial.println(junction_counter);
+//    }
+//    junction_counter = 0;
     //Serial.println(junction_counter);
-    while (junction_counter != 2) {
+    while (junction_counter != counter_decider) {
       adj_zone();
       //Serial.println(junction_counter);
     }
     //Serial.println(junction_counter);
     stop1();
     delay(2000);
-    //    while (1);
+//        while (1);
     //    shuttle_throw();
 
     current = 4;
@@ -515,7 +550,7 @@ void loop()
     while (junction_counter != 2) {
       adj_zone();
     }
-    //    stop1();
+//        stop1();
     //    while (1);
     current = 2;
     next = 3;
@@ -576,12 +611,12 @@ void loop()
 
     stop1();
     delay(2000);
-    current=3;
-    next=6;
+    current = 3;
+    next = 6;
   }
 
-  else if(current == 3&&next==6){
-     velocity[2] = 0;
+  else if (current == 3 && next == 6) {
+    velocity[2] = 0;
     velocity[3] = 0;
     velocity[6] = 0;
     velocity[7] = 0;
@@ -600,7 +635,7 @@ void loop()
     }
 
     stop1();
-    while(1);
+    while (1);
   }
 
 
