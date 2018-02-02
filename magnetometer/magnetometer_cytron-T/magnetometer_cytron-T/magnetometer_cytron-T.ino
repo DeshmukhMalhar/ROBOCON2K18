@@ -14,8 +14,11 @@ uint8_t offset_normal[] = {0, 0, 0, 0, 0, 0, 0, 0};
 float headingDegrees, minimum, maximum, variable;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t low = 25, medium = 30, high = 30, normal = 100;
+int low = 27, medium = 30, high = 32, normal = 70;
 uint8_t relayPin = 22;
+int previous_state, counter_decider;
+int junction_counter = 0;
+int higher = 70;
 
 uint8_t junction_counter = 0;
 
@@ -211,6 +214,7 @@ void adj_out() {
         velocity[1] = 0;
         velocity[4] = medium;
         velocity[5] = 0;     //motor 3
+        //    ////Serial.println("medium right");
     }
         //large right
     else if ((sensor1 | B00000010) == B00000011) {
@@ -218,6 +222,12 @@ void adj_out() {
         velocity[1] = 0;
         velocity[4] = high;
         velocity[5] = 0;  //motor 3
+        //    ////Serial.println("large right");
+    } else if ((sensor1 == B00011000)) {
+        velocity[0] = 0; //motor 1
+        velocity[1] = 0;
+        velocity[4] = 0;
+        velocity[5] = 0;
     }
 
     if (is_junction_out()) {
@@ -327,6 +337,11 @@ void adj_zone() {
         velocity[2] = high;
         velocity[7] = 0;
         velocity[6] = high;  //motor 4
+    } else if (sensor2 == B00011000) {
+        velocity[3] = 0; //motor 2
+        velocity[2] = 0;
+        velocity[7] = 0;
+        velocity[6] = 0;
     }
     if (is_junction_zone()) {
         if (junction == false) {
@@ -413,25 +428,58 @@ void loop() {
         while (junction != true) {
             adj_out();
         }
+        //    while (junction == true) {
+        //      adj_out();
+        //    }
+        //  stop1();
+        //  while(1);
+        while (junction == true) {
+            if ((sensor1 | B00011000) == B01111000 || (sensor1 | B00100000) == B11100000 ||
+                (sensor1 | B01110000) == B11110000 || sensor1 == B00011000) {
+                previous_state = -1;
+            } else {
+                previous_state = 1;
+            }
+
+            adj_out();
+        }
+
         current = 2;
+
         next = 4;
+
         junction_counter = 0;
+
+
     } else if (current == 2 && next == 4) {
         velocity[2] = 0;
         velocity[3] = 0;
         velocity[6] = 0;
         velocity[7] = 0;
+        if (previous_state == -1) {
+            counter_decider = 2;
+        } else if (previous_state == 1) {
+            counter_decider = 3;
+        }
         left();
+        //Serial.println(junction_counter);
         adj_zone();
-        while (junction == true) {
+//    while (junction == true) {
+//      adj_zone();
+//      //Serial.println(junction_counter);
+//    }
+//    junction_counter = 0;
+        //Serial.println(junction_counter);
+        while (junction_counter != counter_decider) {
             adj_zone();
+            //Serial.println(junction_counter);
         }
-        junction_counter = 0;
-        while (junction_counter != 2) {
-            adj_zone();
-        }
+        //Serial.println(junction_counter);
         stop1();
-        shuttle_throw();
+        delay(2000);
+//        while (1);
+        //    shuttle_throw();
+
         current = 4;
         next = 2;
         junction_counter = 0;
