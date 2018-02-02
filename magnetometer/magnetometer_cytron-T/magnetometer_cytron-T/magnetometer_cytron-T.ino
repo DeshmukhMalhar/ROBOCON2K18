@@ -11,14 +11,14 @@ uint8_t motor_pins[] = {10, 11, 3, 2, 4, 5, 7, 6};
 uint8_t corr_velocity[] = {0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t sensor1, sensor2;
 uint8_t offset_normal[] = {0, 0, 0, 0, 0, 0, 0, 0};
-float headingDegrees, minimum, maximum, variable;
+float headingDegrees, minimum, maximum;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 27, medium = 30, high = 32, normal = 70;
+uint8_t low = 27, medium = 30, high = 32, normal = 70;
 uint8_t relayPin = 22;
-int previous_state, counter_decider;
-int junction_counter = 0;
-int higher = 70;
+uint8_t previous_state, counter_decider;
+uint8_t junction_counter = 0;
+uint8_t higher = 70;
 
 uint8_t junction_counter = 0;
 
@@ -428,11 +428,6 @@ void loop() {
         while (junction != true) {
             adj_out();
         }
-        //    while (junction == true) {
-        //      adj_out();
-        //    }
-        //  stop1();
-        //  while(1);
         while (junction == true) {
             if ((sensor1 | B00011000) == B01111000 || (sensor1 | B00100000) == B11100000 ||
                 (sensor1 | B01110000) == B11110000 || sensor1 == B00011000) {
@@ -443,13 +438,9 @@ void loop() {
 
             adj_out();
         }
-
         current = 2;
-
         next = 4;
-
         junction_counter = 0;
-
 
     } else if (current == 2 && next == 4) {
         velocity[2] = 0;
@@ -462,23 +453,12 @@ void loop() {
             counter_decider = 3;
         }
         left();
-        //Serial.println(junction_counter);
         adj_zone();
-//    while (junction == true) {
-//      adj_zone();
-//      //Serial.println(junction_counter);
-//    }
-//    junction_counter = 0;
-        //Serial.println(junction_counter);
         while (junction_counter != counter_decider) {
             adj_zone();
-            //Serial.println(junction_counter);
         }
-        //Serial.println(junction_counter);
         stop1();
-        delay(2000);
-//        while (1);
-        //    shuttle_throw();
+        shuttle_throw();
 
         current = 4;
         next = 2;
@@ -547,7 +527,6 @@ void loop() {
         while (junction_counter != 2) {
             adj_zone();
         }
-
         stop1();
         shuttle_throw();
         current = 3;
@@ -570,7 +549,6 @@ void loop() {
             adj_zone();
 
         }
-
         stop1();
         while (1);
     }
