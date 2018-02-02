@@ -48,23 +48,23 @@ void printSensor() {
 }
 
 
-bool is_junction_out() {
-    sensor1 = PINC;
-    if ((sensor1 | B10000001) == B11111111) {
-        return true;
-    } else return false;
+//bool is_junction_out() {
+//    sensor1 = PINC;
+//    if ((sensor1 | B10000001) == B11111111) {
+//        return true;
+//    } else return false;
+//
+//}
 
-}
-
-bool is_junction_zone() {
-    sensor2 = PINL;
-    if ((sensor2 | B10000001) == B11111111) {
-        return true;
-    }
-//    No need for else
-    return false;
-
-}
+//bool is_junction_zone() {
+//    sensor2 = PINL;
+//    if ((sensor2 | B10000001) == B11111111) {
+//        return true;
+//    }
+////    No need for else
+//    return false;
+//
+//}
 
 
 void set_speed_out() {
@@ -230,7 +230,7 @@ void adj_out() {
         velocity[5] = 0;
     }
 
-    if (is_junction_out()) {
+    if ((sensor1 | B10000001) == B11111111) {
         if (junction == false) {
             junction_counter++;
         }
@@ -343,7 +343,7 @@ void adj_zone() {
         velocity[7] = 0;
         velocity[6] = 0;
     }
-    if (is_junction_zone()) {
+    if ((sensor2 | B10000001) == B11111111) {
         if (junction == false) {
             junction_counter++;
         }
@@ -553,10 +553,6 @@ void loop() {
         while (1);
     }
 
-
-}
-
-void test(){
 
 }
 
