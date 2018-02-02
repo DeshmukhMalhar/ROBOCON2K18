@@ -129,10 +129,7 @@ void set_speed_zone() {
     if (heading > 2 * PI)
         heading -= 2 * PI;
     headingDegrees = heading * 180 / M_PI;
-    //  //Serial.println(headingDegrees);
 
-
-    //  //Serial.println(headingDegrees);
     if (headingDegrees < minimum) {
         ////Serial.println("LEft");
         speedo = (minimum - headingDegrees) * Kp;
@@ -163,7 +160,6 @@ void set_speed_zone() {
         corr_velocity[5] = 0;
     }
     for (int i = 0; i < 8; i++) {
-        //    //Serial.print(velocity[0)
         analogWrite(motor_pins[i],
                     velocity[i] == 0 ? 0 : (velocity[i] == normal ? velocity[i] + corr_velocity[i] : velocity[i]));
     }
@@ -426,6 +422,7 @@ void loop() {
         velocity[6] = 0;
         velocity[7] = 0;
         left();
+        adj_zone();
         while (junction == true) {
             adj_zone();
         }
