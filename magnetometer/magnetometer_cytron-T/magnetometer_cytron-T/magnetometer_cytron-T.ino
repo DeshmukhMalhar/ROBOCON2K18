@@ -11,7 +11,6 @@ uint8_t speedo = 0;
 uint8_t motor_pins[] = {11, 10, 3, 2, 5, 4, 7, 6};
 uint8_t corr_velocity[] = {0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t sensor1, sensor2;
-uint8_t offset_normal[] = {0, 0, 0, 0, 0, 0, 0, 0};
 float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
