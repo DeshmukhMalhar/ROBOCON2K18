@@ -1,8 +1,8 @@
 #include <Wire.h>
-#include "I2C_Anything.h"
 #include "motorDriver.h"
 
-motorDriver::motorDriver(int addr){
+motorDriver::motorDriver(uint8_t addr){
+	Wire.begin();
     _addr=addr;
 }
 
