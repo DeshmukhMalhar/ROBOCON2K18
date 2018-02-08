@@ -1,9 +1,6 @@
-// Written by Nick Gammon
-// May 2012
-
 #include <Wire.h>
 #include <I2C_Anything.h>
-
+#define LED_BUILTIN 7
 byte MY_ADDRESS ;
 
 void setup()
@@ -20,7 +17,7 @@ void setup()
   Wire.onReceive (receiveEvent);
   Serial.print("HI! Address is:0x");
   Serial.println(MY_ADDRESS, HEX);
-  delay(500);
+  flashLed();
 }  // end of setup
 
 volatile boolean haveData = false;
@@ -56,6 +53,7 @@ void receiveEvent (int howMany)
     I2C_readAnything (foo);
     haveData = true;
   }  // end if have enough data
+  digitalWrite(7, !digitalRead(7));
 }  // end of receiveEvent
 
 uint8_t getAddress() {
@@ -65,4 +63,21 @@ uint8_t getAddress() {
   pinc = PINC;
   return ((pinc & 0x0f) + 0x50);
 }
-
+void flashLed() {
+#define LEDPIN 7
+#define DELAY_SHORT 80
+#define DELAY_LONG 200
+  pinMode(LEDPIN, OUTPUT);
+  digitalWrite(7, HIGH);
+  delay(DELAY_SHORT);
+  digitalWrite(LEDPIN, LOW);
+  delay(DELAY_SHORT);
+  digitalWrite(LEDPIN, HIGH);
+  delay(DELAY_SHORT);
+  digitalWrite(LEDPIN, LOW);
+  delay(DELAY_SHORT);
+  digitalWrite(LEDPIN, HIGH);
+  delay(DELAY_LONG);
+  digitalWrite(LEDPIN, LOW);
+  delay(DELAY_SHORT);
+}//End of flashLed
