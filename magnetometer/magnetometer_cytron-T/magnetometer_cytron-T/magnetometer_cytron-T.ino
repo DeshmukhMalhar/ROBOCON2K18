@@ -23,17 +23,20 @@ int junction_counter = 0;
 
 bool junction = false;
 
-int current = 1, next = 2;
-int mz1, mz2, mz3, mz4;
-int mo1, mo2, mo3, mo4;
+uint8_t current = 1, next = 2;
+uint8_t mz1, mz2, mz3, mz4;
+uint8_t mo1, mo2, mo3, mo4;
+
+int i;
+
 
 void initt() {
-  for (int i = 0; i < 8; i++) {
+  for ( i = 0; i < 8; i++) {
     pinMode(motor_pins[i], OUTPUT);
     digitalWrite(motor_pins[i], LOW);
   }
 
-  for (int i = 0; i < 3; i++) {
+  for ( i = 0; i < 3; i++) {
     pinMode(relayPin[i], OUTPUT);
   }
 }
@@ -148,7 +151,7 @@ void set_speed_out() {
     corr_velocity[6] = 0;
     corr_velocity[7] = 0;
   }
-  for (int i = 0; i < 8; i++) {
+  for ( i = 0; i < 8; i++) {
 
     analogWrite(motor_pins[i],
                 velocity[i] == 0 ? 0 : (velocity[i] == normal ? velocity[i] + corr_velocity[i] : velocity[i]));
@@ -207,7 +210,7 @@ void set_speed_zone() {
     corr_velocity[4] = 0;
     corr_velocity[5] = 0;
   }
-  for (int i = 0; i < 8; i++) {
+  for ( i = 0; i < 8; i++) {
     //    ////Serial.print(velocity[0)
     analogWrite(motor_pins[i],
                 velocity[i] == 0 ? 0 : (velocity[i] == normal ? velocity[i] + corr_velocity[i] : velocity[i]));
@@ -444,7 +447,7 @@ void stop1() {
   velocity[5] = 255;
   velocity[6] = 255;
   velocity[7] = 255;
-  for (int i = 0; i < 8; i++) {
+  for ( i = 0; i < 8; i++) {
     analogWrite(motor_pins[i], velocity[i]);
   }
 }
