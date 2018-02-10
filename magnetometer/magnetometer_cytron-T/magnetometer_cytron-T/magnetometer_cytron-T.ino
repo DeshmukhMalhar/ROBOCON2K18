@@ -6,7 +6,7 @@ Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
 
 int previous_state, counter_decider;
-const uint8_t Kp = 15;
+const uint8_t Kp = 17;
 uint8_t speedo = 0;
 uint8_t motor_pins[] = {11, 10, 3, 2, 5, 4, 7, 6};
 uint8_t corr_velocity[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -14,8 +14,10 @@ uint8_t sensor1, sensor2;
 float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 55, medium = 60, high = 70, normal = 100;
-uint8_t relayPin = 22;
+int low = 95, medium = 110, high = 120, normal = 180, lower_speed = 120, higher_speed = 180;
+
+uint8_t threshold = 40;
+uint8_t relayPin[] = {14, 15, 16};
 
 int junction_counter = 0;
 
@@ -31,15 +33,31 @@ void initt() {
     digitalWrite(motor_pins[i], LOW);
   }
 
-  pinMode(relayPin, OUTPUT);
+  for (int i = 0; i < 3; i++) {
+    pinMode(relayPin[i], OUTPUT);
+  }
 }
 
 void shuttle_throw() {
 
   delay(3000);
-  digitalWrite(relayPin, HIGH);
-  delay(500);
-  digitalWrite(relayPin, LOW);
+  if (current == 2 && next == 4) {
+    digitalWrite(relayPin[0], HIGH);
+    delay(500);
+    digitalWrite(relayPin[0], LOW);
+  }
+  else if (current == 3 && next == 5) {
+    digitalWrite(relayPin[1], HIGH);
+    delay(500);
+    digitalWrite(relayPin[1], LOW);
+  }
+  else if (current == 3 && next == 6) {
+    digitalWrite(relayPin[2], HIGH);
+    delay(500);
+    digitalWrite(relayPin[2], LOW);
+  }
+
+
   delay(1000);
 }
 
@@ -94,9 +112,9 @@ void set_speed_out() {
 
 
   if (headingDegrees < minimum) {
-    speedo = (minimum - headingDegrees) * Kp + 30;
-    if (speedo > 120) {
-      speedo = 120;
+    speedo = (minimum - headingDegrees) * Kp + 35;
+    if (threshold > 70) {
+      threshold = 70;
     }
     //    Serial.println(speedo);
     corr_velocity[mo1] = speedo;
@@ -109,9 +127,9 @@ void set_speed_out() {
     //    corr_velocity[7] = 0;
 
   } else if (headingDegrees > maximum) {
-    speedo = (headingDegrees - maximum) * Kp + 30;
-    if (speedo > 120) {
-      speedo = 120;
+    speedo = (headingDegrees - maximum) * Kp + 35;
+    if (threshold > 70) {
+      threshold = 70;
     }
     //    Serial.println(speedo);
     corr_velocity[mo3] = speedo;
@@ -160,26 +178,28 @@ void set_speed_zone() {
   //  ////Serial.println(headingDegrees);
   if (headingDegrees < minimum) {
     //////Serial.println("LEft");
-    speedo = (minimum - headingDegrees) * Kp + 30;
-    if (speedo > 120) {
-      speedo = 120;
+    speedo = (minimum - headingDegrees) * Kp + 35;
+    if (threshold > 70) {
+      threshold = 70;
     }
 
-    corr_velocity[mz1] = speedo;
-
-    corr_velocity[mz3] = 0;
-    corr_velocity[mz4] = 0;
-
-  } else if (headingDegrees > maximum) {
-    //////Serial.println("Right");
-    speedo = (headingDegrees - maximum) * Kp + 30;
-    if (speedo > 120) {
-      speedo = 120;
-    }
     corr_velocity[mz3] = speedo;
 
     corr_velocity[mz1] = 0;
     corr_velocity[mz2] = 0;
+
+
+
+  } else if (headingDegrees > maximum) {
+    //////Serial.println("Right");
+    speedo = (headingDegrees - maximum) * Kp + 35;
+    if (threshold > 70) {
+      threshold = 70;
+    }
+    corr_velocity[mz1] = speedo;
+
+    corr_velocity[mz3] = 0;
+    corr_velocity[mz4] = 0;
 
   } else {
     corr_velocity[1] = 0;
@@ -431,7 +451,7 @@ void stop1() {
 
 void calibrate_magnetometer() {
 
-  //  Serial.begin(9600);
+  Serial.println("function call");
   minimum = 1000;
 
   maximum = -1000;
@@ -458,6 +478,7 @@ void calibrate_magnetometer() {
       minimum = headingDegrees;
     else if (headingDegrees > maximum)
       maximum = headingDegrees;
+
   }
   //  Serial.println("Done calibration");
 }
@@ -468,7 +489,7 @@ void setup() {
   initt();
   //  pinMode(22, OUTPUT);
   Serial.begin(9600);
-  //    Serial.println("HMC5883 Magnetometer Test"); ////Serial.println("");
+  Serial.println("HMC5883 Magnetometer Test"); ////Serial.println("");
 
   /* Initialise the sensor */
 
@@ -483,7 +504,7 @@ void setup() {
       delay(1000);
     }
   }
-  //    Serial.println("Started");
+  Serial.println("Started");
   /* Display some basic information on this sensor */
   //  displaySensorDetails();
 
@@ -549,12 +570,19 @@ void loop() {
     }
 
     //Serial.println(junction_counter);
+    while (junction_counter != counter_decider - 1) {
+      adj_zone();
+      ////Serial.println(junction_counter);
+    }
+    normal = lower_speed;
+    left();
+    ////Serial.println(junction_counter);
     while (junction_counter != counter_decider) {
       adj_zone();
       ////Serial.println(junction_counter);
     }
-    ////Serial.println(junction_counter);
     stop1();
+    normal = higher_speed;
     shuttle_throw();
     //    while (1);
     //    shuttle_throw();
@@ -613,10 +641,17 @@ void loop() {
       }
       junction_counter = 0;
     }
+    while (junction_counter != counter_decider - 1) {
+      adj_zone();
+
+    }
+    normal = lower_speed;
+    left();
     while (junction_counter != counter_decider) {
       adj_zone();
 
     }
+    normal = higher_speed;
     stop1();
     shuttle_throw();
     current = 5;
@@ -654,11 +689,18 @@ void loop() {
       adj_zone();
     }
     junction_counter = 0;
+    while (junction_counter != 4) {
+      adj_zone();
+
+    }
+    normal = lower_speed;
+    left();
     while (junction_counter != 5) {
       adj_zone();
 
     }
     stop1();
+    normal = higher_speed;
     shuttle_throw();
 
     while (1);
