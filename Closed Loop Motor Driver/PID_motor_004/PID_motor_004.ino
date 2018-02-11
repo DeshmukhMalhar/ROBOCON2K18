@@ -25,7 +25,7 @@ volatile boolean haveData = false;
 volatile int data = 0, rpmout; //incomeing I2C data will be stored here,Only 16bit int
 
 
-AutoPID pid(&avgver, &setRpm, &pwmOut, minOp, maxOp, kp, ki, kd);
+AutoPID pid(&avgver, &setRpm, &pwmOut, minOp, maxOp, kp, ki, kd);//PID constructor
 
 
 //ISR for capturing the Encoder waveform
@@ -52,16 +52,18 @@ void setup() {
 #endif
 
   //Setup TIMER1 for phase correct PWM on both channels, with nonInverting PWM mode
-  TCCR1A = 0b10100001;
-  TCCR1B = 0b00000001;
+  TCCR1A = 0b10100001;//COM1A1,COM1A2,COM1B1,COM1B2,R,R,WGM11,WGM10
+  TCCR1B = 0b00000001;//
   OCR1A = 0;
   OCR1B = 0;
+
   //PWM pin ,OCR1x;x:A..B
   DDRB |= (1 << PB1) | (1 << PB2);
 
   //Init I2C
   Wire.begin(getI2Caddr());//get the address from the DIP sw on PORTC
   Wire.onReceive (receiveEvent);//attach function to the I2C interrupt
+
   //flash the LED and tell that we are ready to go
   flashLed();
   sei();//enable interrupts
@@ -74,12 +76,14 @@ void loop() {
     rpm = (60000.0 / x) * 14;
     avgver = runningAverage(rpm);
     rpmout = avgver;
+
 #ifdef DEBUG
     Serial.println(avgver);
 #endif
     //pret=x;//For running changing the PID variables only on changes in RPM,!!BETA!!
   }
   pid.run();//Needs to be called once in a while in loop
+
   //if,data is arrived on I2C,store it in a non Volatile variable
   if (haveData) {
     rpmIN = data;
@@ -102,6 +106,7 @@ void loop() {
     OCR1A = 0;
   }
 }//End of loop
+
 //Running Average function for filtering out the RPM readings
 long runningAverage(int M) {
 #define LM_SIZE 64
@@ -123,8 +128,8 @@ long runningAverage(int M) {
 
 void flashLed() {
 #define LEDPIN 7
-#define DELAY_SHORT 80
-#define DELAY_LONG 200
+#define DELAY_SHORT 40
+#define DELAY_LONG 100
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(7, HIGH);
   delay(DELAY_SHORT);

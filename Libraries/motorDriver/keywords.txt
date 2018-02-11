@@ -1,13 +1,4 @@
-
-#######################################
-# Datatypes (KEYWORD1)
-#######################################
-
 motorDriver	KEYWORD1
-
-#######################################
-# Methods and Functions (KEYWORD2)
-#######################################
 
 sendRPM KEYWORD2
 sendPWM KEYWORD2
