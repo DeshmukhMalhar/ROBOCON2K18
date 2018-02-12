@@ -6,7 +6,7 @@ Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
 
 int previous_state, counter_decider;
-const uint8_t Kp = 17;
+uint8_t Kp = 17;
 uint8_t speedo = 0;
 uint8_t motor_pins[] = {11, 10, 3, 2, 5, 4, 7, 6};
 uint8_t corr_velocity[] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -14,9 +14,9 @@ uint8_t sensor1, sensor2;
 float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 95, medium = 110, high = 120, normal = 180, lower_speed = 120, higher_speed = 180;
+int low = 95, medium = 110, high = 120, normal = 195, lower_speed = 50, higher_speed = 170;
 
-uint8_t threshold = 40;
+uint8_t threshold = 60;
 uint8_t relayPin[] = {14, 15, 16};
 
 int junction_counter = 0;
@@ -26,7 +26,7 @@ bool junction = false;
 uint8_t current = 1, next = 2;
 uint8_t mz1, mz2, mz3, mz4;
 uint8_t mo1, mo2, mo3, mo4;
-
+unsigned long current_millis, interval;
 int i;
 
 
@@ -43,7 +43,39 @@ void initt() {
 
 void shuttle_throw() {
 
-  delay(3000);
+  //  delay(3000);
+
+  //  delay(200)
+  //  adj_zone();
+
+  Kp *= 2;
+  //  bool is_done = false;
+  //  current_millis = millis();
+  //  millis() - current_millis <= 3000
+  while (1) {
+    adj_zone();
+    angular_adj_zone();
+    //Serial.println("adjusting");
+    //    if (is_done == false) {
+    //      adj_zone();
+    //      if (junction != 1 ) {
+    //        right();
+    //        adj_zone();
+    //        Serial.println("im turning right");
+    //      }
+    //      else {
+    //        stop1();
+    //        is_done = true;
+    //        Serial.println("doneeeeeeeeee");
+    //      }
+    //
+    //    }
+
+  }
+
+
+
+  Kp /= 2;
   if (current == 2 && next == 4) {
     digitalWrite(relayPin[0], HIGH);
     delay(500);
@@ -116,8 +148,8 @@ void set_speed_out() {
 
   if (headingDegrees < minimum) {
     speedo = (minimum - headingDegrees) * Kp + 35;
-    if (threshold > 70) {
-      threshold = 70;
+    if (speedo > threshold) {
+      speedo = threshold;
     }
     //    Serial.println(speedo);
     corr_velocity[mo1] = speedo;
@@ -131,8 +163,8 @@ void set_speed_out() {
 
   } else if (headingDegrees > maximum) {
     speedo = (headingDegrees - maximum) * Kp + 35;
-    if (threshold > 70) {
-      threshold = 70;
+    if (speedo > threshold) {
+      speedo = threshold;
     }
     //    Serial.println(speedo);
     corr_velocity[mo3] = speedo;
@@ -182,8 +214,8 @@ void set_speed_zone() {
   if (headingDegrees < minimum) {
     //////Serial.println("LEft");
     speedo = (minimum - headingDegrees) * Kp + 35;
-    if (threshold > 70) {
-      threshold = 70;
+    if (speedo > threshold) {
+      speedo = threshold;
     }
 
     corr_velocity[mz3] = speedo;
@@ -196,8 +228,8 @@ void set_speed_zone() {
   } else if (headingDegrees > maximum) {
     //////Serial.println("Right");
     speedo = (headingDegrees - maximum) * Kp + 35;
-    if (threshold > 70) {
-      threshold = 70;
+    if (speedo > threshold) {
+      speedo = threshold;
     }
     corr_velocity[mz1] = speedo;
 
@@ -217,6 +249,67 @@ void set_speed_zone() {
   }
 
 }
+//////////////////////////////////////////////////////////////////////
+void angular_adj_zone() {
+
+
+
+  sensors_event_t event;
+  mag.getEvent(&event);
+
+  heading = atan2(event.magnetic.y, event.magnetic.x);
+  declinationAngle = 0.005;
+
+  heading += declinationAngle;
+  if (heading < 0)
+    heading += 2 * PI;
+  if (heading > 2 * PI)
+    heading -= 2 * PI;
+  headingDegrees = heading * 180 / M_PI;
+  //  ////Serial.println(headingDegrees);
+
+
+  //  ////Serial.println(headingDegrees);
+  if (headingDegrees < minimum) {
+    //////Serial.println("LEft");
+    speedo = (minimum - headingDegrees) * Kp + 90;
+    if (speedo > threshold) {
+      speedo = threshold;
+    }
+
+    corr_velocity[mz3] = speedo;
+
+    corr_velocity[mz1] = 0;
+    corr_velocity[mz2] = 0;
+
+
+
+  } else if (headingDegrees > maximum) {
+    //////Serial.println("Right");
+    speedo = (headingDegrees - maximum) * Kp + 90;
+    if (speedo > threshold) {
+      speedo = threshold;
+    }
+    corr_velocity[mz1] = speedo;
+
+    corr_velocity[mz3] = 0;
+    corr_velocity[mz4] = 0;
+
+  } else {
+    corr_velocity[1] = 0;
+    corr_velocity[0] = 0;
+    corr_velocity[4] = 0;
+    corr_velocity[5] = 0;
+  }
+  for ( i = 0; i < 8; i++) {
+    //    ////Serial.print(velocity[0)
+    analogWrite(motor_pins[i],                velocity[i] == 0 ? 0 : corr_velocity[i]);
+
+                //                velocity[i] == 0 ? 0 : (velocity[i] == normal ? velocity[i] + corr_velocity[i] : velocity[i]));
+  }
+
+}
+///////////////////////////////////////////////////
 
 void adj_out() {
 
@@ -381,7 +474,9 @@ void adj_zone() {
       junction_counter++;
     }
     junction = true;
-  } else junction = false;
+  } else {
+    junction = false;
+  }
 
   set_speed_zone();
 }
@@ -518,7 +613,9 @@ void setup() {
 }
 
 void loop() {
-
+//  while (true) {
+//    adj_out();
+//  }
 
   if (current == 1 && next == 2) {
     Serial.println("c1 n2");
@@ -526,7 +623,7 @@ void loop() {
     while (junction != true) {
 
       adj_out();
-      Serial.println(PINC, BIN);
+      //      Serial.println(PINC, BIN);
     }
     Serial.println("After juntion");
     //      while(1);
@@ -585,8 +682,9 @@ void loop() {
       ////Serial.println(junction_counter);
     }
     stop1();
-    normal = higher_speed;
+
     shuttle_throw();
+    normal = higher_speed;
     //    while (1);
     //    shuttle_throw();
 
