@@ -1,0 +1,92 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+//#define debug
+
+RF24 radio(2, 3); // CE, CSN
+const byte address[6] = "00001";
+void setup() {
+  Serial.begin(9600);
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.stopListening();
+  pinMode (7, INPUT);
+  pinMode (6, INPUT);
+  pinMode (5, INPUT);
+  pinMode (4, INPUT);
+
+  //  const char text[] = "UP";
+  //  radio.write(&text, sizeof(text));
+  //  delay(100);
+  //Serial.begin (9600);
+
+}
+void loop() {
+#ifdef debug
+  Serial.print("pin 7 :: ");
+  Serial.println(digitalRead(7));
+#endif
+
+  if (digitalRead(7) == HIGH)
+  {
+    int text = '7' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+#ifdef debug
+  Serial.print("pin 6 :: ");
+  Serial.println(digitalRead(6));
+#endif
+  else if (digitalRead(6) == HIGH)
+  {
+    int text = '6' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+#ifdef debug
+  Serial.print("pin 4 :: ");
+  Serial.println(digitalRead(4));
+#endif
+  else if (digitalRead(4) == HIGH)
+  {
+    int text = '4' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+#ifdef debug
+  Serial.print("pin 5 :: ");
+  Serial.println(digitalRead(5));
+#endif
+  else if (digitalRead(5) == HIGH)
+  {
+    int text = '5' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+#ifdef debug
+  Serial.print("pin 9 :: ");
+  Serial.println(digitalRead(9));
+#endif
+  else if (digitalRead(9) == HIGH)
+  {
+    int text = '9' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+#ifdef debug
+  Serial.print("pin 8 :: ");
+  Serial.println(digitalRead(8));
+#endif
+  else if (digitalRead(8) == HIGH)
+  {
+    int text = '8' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+  else
+  { int text = '0' ;
+    radio.write(&text, sizeof(text));
+    delay(100);
+  }
+}

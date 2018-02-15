@@ -1,0 +1,152 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+RF24 radio(22, 23); // CE, CSN
+const byte address[6] = "00001";
+
+int i = 0;
+void forward() {
+  analogWrite(3, 150);//lb
+  analogWrite(8, 255);
+  analogWrite(4, 150);//lf
+  analogWrite(9, 255);
+  analogWrite(5, 150);//rf
+  analogWrite(10, 255);
+  analogWrite(6, 150);//rb
+  analogWrite(11, 255);
+  Serial.println("inside up");
+}
+void backward() {
+  analogWrite(3, 255);//LF
+  analogWrite(8, 150);
+  analogWrite(4, 255);//LB
+  analogWrite(9, 150);
+  analogWrite(5, 255);//RF
+  analogWrite(10, 150);
+  analogWrite(6, 255);//RB
+  analogWrite(11, 150);
+  Serial.println("inside back");
+
+}
+void right() {
+  analogWrite(3, 150);
+  analogWrite(8, 255);
+  analogWrite(4, 255);
+  analogWrite(9, 150);
+  analogWrite(5, 150);//RF
+  analogWrite(10, 255);
+  analogWrite(6, 255);//RB
+  analogWrite(11, 150);
+  Serial.println("inside rt");
+
+}
+void left() {
+  analogWrite(3, 255);//LF
+  analogWrite(8, 150);
+  analogWrite(4, 150);//LB
+  analogWrite(9, 255);
+  analogWrite(5, 255);
+  analogWrite(150, 150);
+  analogWrite(6, 150);
+  analogWrite(11, 255);
+  Serial.println("inside lft");
+
+
+}
+void stopper() {
+  analogWrite(3, 255);//LF
+  analogWrite(8, 255);
+  analogWrite(4, 255);//LB
+  analogWrite(9, 255);
+  analogWrite(5, 255);//RF
+  analogWrite(10, 255);
+  analogWrite(6, 255);//RB
+  analogWrite(11, 255);
+  Serial.println("inside stop");
+
+}
+void clk()
+{
+  analogWrite(3, 255);//LF
+  analogWrite(8, 150);
+  analogWrite(4, 150);//LB
+  analogWrite(9, 255);
+  analogWrite(5, 150);//RF
+  analogWrite(10, 255);
+  analogWrite(6, 255);//RB
+  analogWrite(11, 150);
+}
+void aclk()
+{
+  analogWrite(3, 150);
+  analogWrite(8, 255);
+  analogWrite(4, 255);
+  analogWrite(9, 150);
+  analogWrite(5, 255);
+  analogWrite(10, 150);
+  analogWrite(6, 150);
+  analogWrite(11, 255);
+}
+void setup() {
+  Serial.begin(9600);
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setAutoAck(1);
+  radio.setPALevel(RF24_PA_MAX);
+  //  radio.setCRCLength(RF24_CRC_16);
+  radio.startListening();
+  radio.printDetails();
+  pinMode (3, OUTPUT);
+  pinMode (4, OUTPUT);
+  pinMode (5, OUTPUT);
+  pinMode (6, OUTPUT);
+  pinMode (8, OUTPUT);
+  pinMode (9, OUTPUT);
+  pinMode (10, OUTPUT);
+  pinMode (11, OUTPUT);
+}
+char text[32] = "";
+void loop() {
+  if (radio.available()) {
+    radio.read(&text, sizeof(text));
+    Serial.println(text);
+
+    ////////////////////////////////////////
+    if (strcmp("4", text) == 0) {
+      forward();
+      delay(100);
+    }
+    else if (strcmp("5", text) == 0) {
+      backward();
+      delay(100);
+    }
+    else if (strcmp("7", text) == 0) {
+      right();
+      delay(100);
+    }
+    else if (strcmp("6", text) == 0) {
+      left();
+      delay(100);
+    }
+    else if (strcmp("0", text) == 0) {
+      Serial.println("stop");
+      stopper();
+      delay(100);
+    }
+    else if (strcmp("9", text) == 0) {
+      Serial.println("clk");
+      clk();
+      delay(100);
+    }
+    else if (strcmp("8", text) == 0) {
+      Serial.println("aclk");
+      aclk();
+      delay(100);
+    }
+    else {
+      delay(100);
+    }
+
+  }
+}
+
