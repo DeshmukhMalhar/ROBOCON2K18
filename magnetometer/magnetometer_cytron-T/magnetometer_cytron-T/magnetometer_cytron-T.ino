@@ -5,10 +5,6 @@
   R
   O
   N
-
-
-
-
 */
 #include <Adafruit_Sensor.h>
 #include <Adafruit_HMC5883_U.h>
@@ -31,7 +27,7 @@ uint8_t sensor1, sensor2;
 float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 95, medium = 110, high = 120, normal = 195, lower_speed = 100, higher_speed = 170;
+int low = 95, medium = 110, high = 120, normal = 175, lower_speed = 120, higher_speed = 170;
 
 uint8_t threshold = 60;
 uint8_t relayPin[] = {14, 15, 16};
@@ -100,20 +96,6 @@ void armCheck() {
     }
   }
 
-
-  //  if (digitalRead(arm1) == HIGH) {
-  //
-  //
-  //
-  //
-  //  } else if (digitalRead(arm2) == HIGH) {
-  //
-  //    next = 5;
-  //
-  //  } else if (digitalRead(arm3) == HIGH) {
-  //    next = 6;
-  //
-  //  }
 
 }
 
@@ -552,15 +534,22 @@ void adj_zone() {
     velocity[7] = 0;
   }
   else if (sensor2 == 0) {
-    if ((current == 1 || current == 2 ) && ( next == 4 || next == 5)) {
+    if ((current == 1 || current == 2 ) && ( next == 4 || next == 5 || next == 6)) {
       velocity[3] = high; //motor 2
       velocity[2] = 0;
       velocity[7] = high;
       velocity[6] = 0;  //motor 4
     }
-    //    else if
 
+  }
 
+  else if (sensor2 == 0) {
+    if ((current == 3) && (next == 4)) {
+      velocity[3] = high; //motor 2
+      velocity[2] = 0;
+      velocity[7] = high;
+      velocity[6] = 0;  //motor 4
+    }
   }
   //  else if (sensor2 == 0 && current == 2 && (next == 4 || next == 5 || next == 6)) {
   //    velocity[3] = high; //motor 2
@@ -754,7 +743,7 @@ void setup() {
   /* Display some basic information on this sensor */
   //  displaySensorDetails();
 
-  calibrate_magnetometer();
+    calibrate_magnetometer();
 
   //Serial.println("Done");
 
@@ -763,15 +752,14 @@ void setup() {
 
 
 void loop() {
-  //  while(1){
-  //    forward();
-  //
-  //  }
+  
+
 
   armCheck();
 
   if (current == 1 && next == 2) {
     //    Serial.println("c1 n2");
+    normal = higher_speed;
     forward();
     adj_out(); junction_counter = 0;
 
@@ -798,6 +786,7 @@ void loop() {
 
   } else if (current == 2 && next == 4) {
     ////Serial.println("c1 n2");
+    normal = higher_speed;
     adj_zone();
 
 
@@ -845,6 +834,7 @@ void loop() {
 
   } else if (current == 4 && next == 2) {
     //    Serial.println("inside current 4444444444444444 next 222222222222222");
+    normal = higher_speed;
     right();
     adj_zone();
     while (junction != true) {
@@ -889,6 +879,7 @@ void loop() {
     velocity[3] = 0;
     velocity[6] = 0;
     velocity[7] = 0;
+    normal = higher_speed;
     left();
     adj_zone();
     while (!junction) {
@@ -921,6 +912,7 @@ void loop() {
     next = 3;
     junction_counter = 0;
   } else if (current == 5 && next == 3) {
+    normal = higher_speed;
     right();
     adj_zone();
     while (junction != true) {
@@ -939,6 +931,7 @@ void loop() {
     armCheck();
     //    next = 6;
   } else if (current == 3 && next == 6) {
+    normal = higher_speed;
     velocity[2] = 0;
     velocity[3] = 0;
     velocity[6] = 0;
@@ -1106,7 +1099,7 @@ void loop() {
     stop1();
     junction_counter = 0;
     adj_zone();
-
+    normal = higher_speed;
     //
     //    junction_counter = 0;
 
@@ -1147,7 +1140,7 @@ void loop() {
 
     }
     stop1();
-    while (1);
+    //    while (1);
 
     shuttle_throw();
     normal = higher_speed;
@@ -1156,6 +1149,7 @@ void loop() {
     next = 2;
     junction_counter = 0;
   } else if (current == 1 && next == 4) {
+    normal = higher_speed;
     //    Serial.println("inside current 1111111 and next 444444444");
     forward();
     adj_out();
@@ -1190,7 +1184,7 @@ void loop() {
     else {
       counter_decider = 2;
     }
-
+    normal = higher_speed;
     left();
     adj_zone();
     junction_counter = 0;
@@ -1229,6 +1223,7 @@ void loop() {
 
   else if (current == 1 && next == 5 ) {
     junction_counter = 0;
+    normal = higher_speed;
     forward();
     while (junction_counter != 2) {
       adj_out();

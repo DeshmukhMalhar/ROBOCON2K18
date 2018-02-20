@@ -1,0 +1,62 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/motorDriver.cpp
+Wire.h
+-
+I2C_Anything.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/I2C_Anything.h
+motorDriver.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/motorDriver.h
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/motorDriver.h
+Wire.h
+-
+I2C_Anything.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/I2C_Anything.h
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves_lib/motorDriver.cpp
+Wire.h
+-
+I2C_Anything.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves_lib/I2C_Anything.h
+motorDriver.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves_lib/motorDriver.h
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves_lib/motorDriver.h
+Wire.h
+-
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_001/AutoPID.cpp
+AutoPID.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_001/AutoPID.h
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_001/AutoPID.h
+Arduino.h
+-
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_004/AutoPID.cpp
+AutoPID.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_004/AutoPID.h
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_004/AutoPID.h
+Arduino.h
+-
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/motorDriver/motorDriver.cpp
+Wire.h
+-
+motorDriver.h
+/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/motorDriver/motorDriver.h
+
+/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/motorDriver/motorDriver.h
+Wire.h
+-
+Arduino.h
+-
+

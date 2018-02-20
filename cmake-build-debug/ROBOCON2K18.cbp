@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="ROBOCON2K18"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ROBOCON2K18">
+				<Option output="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/ROBOCON2K18" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 ROBOCON2K18"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ROBOCON2K18/fast">
+				<Option output="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/ROBOCON2K18" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/5"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/5"/>
+					<Add directory="/usr/include/c++/5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 ROBOCON2K18/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/prathamesh/Documents/ww/ROBOCON2K18/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/motorDriver.cpp">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves/motorDriver.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves_lib/motorDriver.cpp">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/I2C_anything_Master_2Slaves_lib/motorDriver.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_001/AutoPID.cpp">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_001/AutoPID.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_004/AutoPID.cpp">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Closed Loop Motor Driver/PID_motor_004/AutoPID.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/Adafruit_Unified_Sensor/Adafruit_Sensor.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/I2C_Anything/I2C_Anything.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/motorDriver/I2C_Anything.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/motorDriver/motorDriver.cpp">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/Libraries/motorDriver/motorDriver.h">
+			<Option target="ROBOCON2K18"/>
+		</Unit>
+		<Unit filename="/home/prathamesh/Documents/ww/ROBOCON2K18/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
