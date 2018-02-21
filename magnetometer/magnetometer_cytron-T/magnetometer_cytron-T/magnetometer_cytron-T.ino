@@ -27,16 +27,16 @@ uint8_t sensor1, sensor2;
 float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 95, medium = 110, high = 120, normal = 175, lower_speed = 120, higher_speed = 170;
+int low = 20, medium = 30, high = 40, normal = 80, lower_speed = 40, higher_speed = 80;
 
-uint8_t threshold = 60;
+uint8_t threshold = 90;
 uint8_t relayPin[] = {14, 15, 16};
 
 int junction_counter = 0;
 bool flag = false;
 bool junction = false;
 
-uint8_t current = 1, next = 0;
+uint8_t current = 1, next = 2;
 uint8_t mz1, mz2, mz3, mz4;
 uint8_t mo1, mo2, mo3, mo4;
 unsigned long current_millis, interval, prev;
@@ -130,12 +130,10 @@ void print_lcd() {
 void initt() {
   for ( i = 0; i < 8; i++) {
     pinMode(motor_pins[i], OUTPUT);
-    digitalWrite(motor_pins[i], LOW);
   }
 
-  for ( i = 0; i < 3; i++) {
-    pinMode(relayPin[i], OUTPUT);
-  }
+
+
 }
 
 void shuttle_throw() {
@@ -208,14 +206,20 @@ void set_speed_out() {
   if (heading > 2 * PI)
     heading -= 2 * PI;
   headingDegrees = heading * 180 / M_PI;
-  //  //////Serial.println(headingDegrees);
+  //   Serial.println(headingDegrees);
 
 
 
 
 
   if (headingDegrees < minimum) {
-    speedo = (minimum - headingDegrees) * Kp + 35;
+    Serial.print("headingDegrees < minimum");
+    Serial.print(headingDegrees);
+    Serial.println("minimum");
+    Serial.print(minimum);
+    Serial.println("maximum");
+    Serial.print(maximum);
+    speedo = (minimum - headingDegrees) * Kp +20;
     if (speedo > threshold) {
       speedo = threshold;
     }
@@ -230,7 +234,8 @@ void set_speed_out() {
     //    corr_velocity[7] = 0;
 
   } else if (headingDegrees > maximum) {
-    speedo = (headingDegrees - maximum) * Kp + 35;
+    Serial.println("headingDegrees > maximum");
+    speedo = (headingDegrees - maximum) * Kp + 20;
     if (speedo > threshold) {
       speedo = threshold;
     }
@@ -255,6 +260,7 @@ void set_speed_out() {
 
     analogWrite(motor_pins[i],
                 velocity[i] == 0 ? 0 : (velocity[i] == normal ? velocity[i] + corr_velocity[i] : velocity[i]));
+    Serial.println(velocity[i]);
   }
 
 }
@@ -286,10 +292,13 @@ void set_speed_zone() {
       speedo = threshold;
     }
 
-    corr_velocity[mz3] = speedo;
 
-    corr_velocity[mz1] = 0;
-    corr_velocity[mz2] = 0;
+
+    corr_velocity[mz1] = speedo;
+
+    corr_velocity[mz3] = 0;
+    corr_velocity[mz4] = 0;
+
 
 
 
@@ -299,10 +308,11 @@ void set_speed_zone() {
     if (speedo > threshold) {
       speedo = threshold;
     }
-    corr_velocity[mz1] = speedo;
+    corr_velocity[mz3] = speedo;
 
-    corr_velocity[mz3] = 0;
-    corr_velocity[mz4] = 0;
+    corr_velocity[mz1] = 0;
+    corr_velocity[mz2] = 0;
+
 
   } else {
     corr_velocity[1] = 0;
@@ -345,11 +355,10 @@ void angular_adj_zone() {
       speedo = threshold;
     }
 
-    corr_velocity[mz3] = speedo;
+    corr_velocity[mz1] = speedo;
 
-    corr_velocity[mz1] = 0;
-    corr_velocity[mz2] = 0;
-
+    corr_velocity[mz3] = 0;
+    corr_velocity[mz4] = 0;
 
 
   } else if (headingDegrees > maximum) {
@@ -358,10 +367,14 @@ void angular_adj_zone() {
     if (speedo > threshold) {
       speedo = threshold;
     }
-    corr_velocity[mz1] = speedo;
 
-    corr_velocity[mz3] = 0;
-    corr_velocity[mz4] = 0;
+
+
+
+    corr_velocity[mz3] = speedo;
+
+    corr_velocity[mz1] = 0;
+    corr_velocity[mz2] = 0;
 
   } else {
     corr_velocity[1] = 0;
@@ -683,7 +696,7 @@ void calibrate_magnetometer() {
 
 
   long currentmillis = millis();
-  while (millis() < currentmillis + 5000) {
+  while (millis() < currentmillis + 2000) {
 
     sensors_event_t event;
     mag.getEvent(&event);
@@ -743,7 +756,7 @@ void setup() {
   /* Display some basic information on this sensor */
   //  displaySensorDetails();
 
-    calibrate_magnetometer();
+  calibrate_magnetometer();
 
   //Serial.println("Done");
 
@@ -752,10 +765,13 @@ void setup() {
 
 
 void loop() {
-  
 
 
-  armCheck();
+  //while(1){
+  //  Serial.println(PINC,BIN);
+  //}
+
+  //  armCheck();
 
   if (current == 1 && next == 2) {
     //    Serial.println("c1 n2");
@@ -765,11 +781,11 @@ void loop() {
 
     while (junction != true) {
 
-      if (digitalRead(51)) {
-        //        stop1();
-        forward_slow();
-        //        //Serial.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-      }
+      //      if (digitalRead(51)) {
+      //        //        stop1();
+      //        forward_slow();
+      //        //        //Serial.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+      //      }
       adj_out();
       //      //Serial.println(PINC, BIN);
     }
@@ -850,8 +866,9 @@ void loop() {
     stop1();
     //    while (1);
     current = 2;
-    armCheck();
-    //    next = 3;
+    //    armCheck();
+
+    next = 3;
     //    Serial.println(":current");
     //    Serial.println(current);
     //    Serial.println("next");
@@ -928,8 +945,8 @@ void loop() {
 
     stop1();
     current = 3;
-    armCheck();
-    //    next = 6;
+    //    armCheck();
+    next = 6;
   } else if (current == 3 && next == 6) {
     normal = higher_speed;
     velocity[2] = 0;
@@ -956,6 +973,7 @@ void loop() {
 
     }
     stop1();
+    while (1);
     current = 6;
     next = 3;
     normal = higher_speed;
@@ -984,7 +1002,9 @@ void loop() {
     normal = higher_speed;
     stop1();
     current = 3;
-    armCheck();
+    next = 6;
+    //    armCheck();
+
   }
 
   else if (current == 2 && next == 5) {
