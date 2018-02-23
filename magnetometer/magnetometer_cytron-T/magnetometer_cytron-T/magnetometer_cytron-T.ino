@@ -15,6 +15,7 @@
 #define arm3 16
 #define ultra_out 17
 #define ultra_zone 18
+
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #define PIN 50
@@ -31,10 +32,10 @@ uint8_t sensor1, sensor2;
 float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-int low = 32, medium = 42, high = 67, normal = 100, lower_speed = 50, higher_speed = 100;
+int low = 32, medium = 42, high = 67, normal = 110, lower_speed = 50, higher_speed = 110;
 
 uint8_t threshold ;
-uint8_t relayPin[] = {14, 15, 16};
+uint8_t relayPin[] = {23, 25, 27}; //23 tz1; 25 tz2 ; 27 tz3
 
 int junction_counter = 0;
 bool flag = false;
@@ -45,13 +46,13 @@ uint8_t mz1, mz2, mz3, mz4;
 uint8_t mo1, mo2, mo3, mo4;
 unsigned long current_millis, interval, prev;
 int i;
-int check_timer = 2000;
+int check_timer = 1000;
 int counter;
 void lukluk() {
   while (counter != 2) {
     for (int i = 0; i < 5; i++) {
       strip.begin();
-      strip.setPixelColor(i, 150,77, 255);
+      strip.setPixelColor(i, 255, 255, 255);
       strip.show();
     }
     delay(100);
@@ -64,7 +65,7 @@ void lukluk() {
     counter++;
   }
 
-counter=0;
+  counter = 0;
 
 
 }
@@ -162,25 +163,33 @@ void initt() {
 
 void shuttle_throw() {
   lukluk();
- 
-  if (current == 2 && next == 4) {
+  lukluk();
+  //  digitalWrite(relayPin[0], HIGH);
+  //  delay(2000);
+  //  digitalWrite(relayPin[0], LOW);
+
+
+
+
+  if ( next == 4) {
     digitalWrite(relayPin[0], HIGH);
-    delay(500);
+    delay(2000);
     digitalWrite(relayPin[0], LOW);
   }
-  else if (current == 3 && next == 5) {
+  else if (next == 5) {
     digitalWrite(relayPin[1], HIGH);
-    delay(500);
+    delay(2000);
     digitalWrite(relayPin[1], LOW);
   }
-  else if (current == 3 && next == 6) {
+  else if ( next == 6) {
+
     digitalWrite(relayPin[2], HIGH);
-    delay(500);
+    delay(2000);
     digitalWrite(relayPin[2], LOW);
   }
 
 
-  delay(1000);
+  //  delay(1000);
 }
 
 void displaySensorDetails(void) {
@@ -768,6 +777,9 @@ void setup() {
   pinMode(ultra_out, INPUT);
   pinMode(ultra_zone, INPUT);
   pinMode(51, INPUT);
+  pinMode(23, OUTPUT);
+  pinMode(25, OUTPUT);
+  pinMode(27, OUTPUT);
   Serial.begin(9600);
   //Serial.println("HMC5883 Magnetometer Test"); //////Serial.println("");
 
@@ -800,21 +812,24 @@ void setup() {
 
 void loop() {
 
+  //   while(1){
+  //
+  //    if(digitalRead(17)){
+  //      Serial.println("high");
+  //    }
+  //    else {
+  //      Serial.println("low");
+  //    }
+  //   }
 
   //  while(1){
   //    Serial.println(PINC,BIN);
   //  }
-
+  //next=5;
+  //shuttle_throw();
+  //while(1);
   armCheck();
-  // while(1){
-  //
-  //  if(digitalRead(17)){
-  //    Serial.println("high");
-  //  }
-  //  else {
-  //    Serial.println("low");
-  //  }
-  // }
+
 
 
   if (current == 1 && next == 2) {
@@ -874,14 +889,16 @@ void loop() {
     junction_counter = 0;
     //    Serial.println(junction_counter);
 
-    threshold = 240 - constant - normal;
+    //    threshold = 240 - constant - normal;
     while (junction_counter != 1) {
       adj_zone();
     }
     //    Serial.println(junction_counter);
-
+    stop1();
     normal = lower_speed;
+
     threshold = 240 - constant - normal;
+    left();
     while (junction_counter != 2) {
       adj_zone();
     }
@@ -969,9 +986,10 @@ void loop() {
       adj_zone();
     }
     //    Serial.println(junction_counter);
-
+    stop1();
     normal = lower_speed;
     threshold = 240 - constant - normal;
+    left();
     while (junction_counter != 2) {
       adj_zone();
     }
@@ -1033,16 +1051,16 @@ void loop() {
     }
     stop1();
     //    while (1);
-    delay(500);
-    current = 6;
-    next = 3;
+    //    delay(500);
     normal = higher_speed;
     shuttle_throw();
+    current = 6;
+    next = 3;
 
   } else if (current == 6 && next == 3) {
     normal = higher_speed;
     threshold = 240 - constant - normal;
-    //    Serial.println("in 666666666666666 to 333333333333333");
+    Serial.println("in 666666666666666 to 333333333333333");
     right();
     adj_zone();
     while (junction != true) {
@@ -1238,6 +1256,7 @@ void loop() {
     next = 2;
     junction_counter = 0;
   } else if (current == 1 && next == 4) {
+    Kp *= Kp;
     normal = higher_speed;
     threshold = 240 - constant - normal;
     //    Serial.println("inside current 1111111 and next 444444444");
@@ -1299,6 +1318,7 @@ void loop() {
     stop1();
     normal = lower_speed;
     threshold = 240 - constant - normal;
+    //    Kp=Kp*2;
     left();
 
     while (junction_counter != counter_decider) {
@@ -1306,6 +1326,7 @@ void loop() {
 
     }
     stop1();
+    //    Kp=Kp/2;
     shuttle_throw();
     normal = higher_speed;
 
@@ -1316,6 +1337,7 @@ void loop() {
     //    Serial.println("next");
     //    Serial.println(next);
     junction_counter = 0;
+    Kp /= Kp;
   }
 
 
@@ -1436,12 +1458,19 @@ void loop() {
     shuttle_throw();
     current = 6;
     next = 3;
-    normal = higher_speed;
+    Serial.println(current);
+    Serial.println(next);
+
+
+
+
+    //    normal = higher_speed;
 
   }
 
 
 }
+
 
 
 
