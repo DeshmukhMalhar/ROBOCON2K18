@@ -15,7 +15,6 @@
 #define arm3 16
 #define ultra_out 17
 #define ultra_zone 18
-
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #define PIN 50
@@ -47,6 +46,7 @@ uint8_t mo1, mo2, mo3, mo4;
 unsigned long current_millis, interval, prev;
 int i;
 int check_timer = 1000;
+int calibration_time = 2000;
 int counter;
 void lukluk() {
   while (counter != 2) {
@@ -599,10 +599,10 @@ void adj_zone() {
 
   else if (sensor2 == 0) {
     if ((current == 3) && (next == 4)) {
-      velocity[3] = high; //motor 2
-      velocity[2] = 0;
-      velocity[7] = high;
-      velocity[6] = 0;  //motor 4
+      velocity[3] = 0; //motor 2
+      velocity[2] = high;
+      velocity[7] = 0;
+      velocity[6] = high;  //motor 4
     }
   }
   //  else if (sensor2 == 0 && current == 2 && (next == 4 || next == 5 || next == 6)) {
@@ -737,7 +737,7 @@ void calibrate_magnetometer() {
 
 
   long currentmillis = millis();
-  while (millis() < currentmillis + 5000) {
+  while (millis() < currentmillis + calibration_time) {
 
     sensors_event_t event;
     mag.getEvent(&event);
@@ -811,16 +811,16 @@ void setup() {
 
 
 void loop() {
-
-  //   while(1){
-  //
-  //    if(digitalRead(17)){
-  //      Serial.println("high");
-  //    }
-  //    else {
-  //      Serial.println("low");
-  //    }
-  //   }
+//
+//     while(1){
+//  
+//      if(digitalRead(18)){
+//        Serial.println("high");
+//      }
+//      else {
+//        Serial.println("low");
+//      }
+//     }
 
   //  while(1){
   //    Serial.println(PINC,BIN);
@@ -916,8 +916,9 @@ void loop() {
     junction_counter = 0;
 
   } else if (current == 4 && next == 2) {
-    //    Serial.println("inside current 4444444444444444 next 222222222222222");
-    normal = higher_speed;
+    Kp = Kp * 2;
+        Serial.println("inside current 4444444444444444 next 222222222222222");
+    normal = higher_speed + 70 + 40;
     threshold = 240 - constant - normal;
     right();
     adj_zone();
@@ -929,12 +930,21 @@ void loop() {
     }
     junction_counter = 0;
     while (junction_counter != 2) {
+      if (digitalRead(ultra_zone)) {
+        stop1();
+//        Serial.println("ultrazone");
+//          Serial.println(junction_counter);
+        normal = 55;
+        right();
+        threshold = 240 - constant - normal;
+      }
       adj_zone();
     }
     stop1();
     //    while (1);
     current = 2;
     armCheck();
+    Kp = Kp / 2;
 
     //    next = 3;
     //    Serial.println(":current");
@@ -1256,18 +1266,21 @@ void loop() {
     next = 2;
     junction_counter = 0;
   } else if (current == 1 && next == 4) {
-    Kp *= Kp;
-    normal = higher_speed;
+    
+    Kp *= 2;
+    normal = higher_speed + 70 + 40;
     threshold = 240 - constant - normal;
-    //    Serial.println("inside current 1111111 and next 444444444");
+        Serial.println("inside current 1111111 and next 444444444");
     forward();
     adj_out();
 
     while (junction != true) {
 
-      if (digitalRead(17)) {
-        //                        stop1();
-        normal = 50;
+      if (digitalRead(ultra_out)) {
+        //
+        stop1();
+
+        normal = 55;
         forward_slow();
         threshold = 240 - constant - normal;
 
@@ -1337,7 +1350,7 @@ void loop() {
     //    Serial.println("next");
     //    Serial.println(next);
     junction_counter = 0;
-    Kp /= Kp;
+    Kp /= 2;
   }
 
 
