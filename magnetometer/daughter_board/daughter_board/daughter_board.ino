@@ -1,47 +1,27 @@
+#include <LiquidCrystal_I2C.h>
 #include <Adafruit_NeoPixel.h>
-
 #define trigPinO 52
 #define echoPinO A13
 #define trigPinZ 50
 #define echoPinZ A12
-//#define trigPinZ 48
-//#define echoPinZ A15
-#define arm1 24//proxi1
-#define arm2 22//proxi2
-#define arm3 23//proxi3
-//#define proxy4 25
-//#define proxy5 27
-
+#define proxi1 24
+#define proxi2 22
+#define proxi3 23
+#define ultra_out 17
+#define check_proxi 18
+#define arm1 14
+#define arm2 15
+#define arm3 16
+#define shuttle_pin 19
 #define PIN 50
+#define start_ultra 26
+long durationO, distanceO, durationZ, distanceZ;
+int current = 1, next = 1;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
+int counter = 0;
 unsigned long current_millis, interval, prev;
-int counter;
-int cytron1_pin[] = {29, 31, 33, 35, 37, 39, 41, 43},
-                    cytron2_pin[] = {2, 3, 4, 5, 6, 7, 10, 11};
-int read_pins[] = {18, 19}, write_pins[] = {14, 15, 16, 17};
-uint8_t received_data, transmit_data;
 int check_timer = 1000;
-int relayPin[] = {51, 49, 47};
-int throw_decider = 0;
-bool current_ultrasonic = 0;
-unsigned long durationO, distanceO, durationZ, distanceZ;
-
-void Rx() {
-  received_data = 0;
-  for (int i = 0; i < 2; i++) {
-    received_data |= digitalRead(read_pins[i]) << i;
-  }
-}
-
-void Tx() {
-  Serial.println("transmitting data in tx");
-  for (int i = 0; i < 4; i++) {
-    digitalWrite(write_pins[i], bitRead(transmit_data, i));
-    Serial.print( bitRead(transmit_data, i));
-  }
-  Serial.println();
-}
-
+int relay_pins[] = {47, 49, 51};
 void lukluk() {
   while (counter != 2) {
     for (int i = 0; i < 5; i++) {
@@ -64,111 +44,54 @@ void lukluk() {
 
 }
 
-void shuttle_throw() {
-  lukluk();
-  lukluk();
-  Serial.println("in shuttle throw");
-  Serial.println("throw_decider");
-  Serial.println(throw_decider);
-
-  if (throw_decider = 1) {
-    digitalWrite(relayPin[0], HIGH);
-    delay(2000);
-    digitalWrite(relayPin[0], LOW);
-
-  } else if (throw_decider = 2) {
-    digitalWrite(relayPin[1], HIGH);
-    delay(2000);
-    digitalWrite(relayPin[1], LOW);
-  } else if (throw_decider = 3) {
-
-    digitalWrite(relayPin[2], HIGH);
-    delay(2000);
-    digitalWrite(relayPin[2], LOW);
-  }
-
-  transmit_data = B00001000;
-  Tx();
-  Serial.println("shuttle throw completed");
-  Serial.println(transmit_data);
-
-  transmit_data = B00000000;
-  Tx();
-  //  delay(1000);
-}
-
 void armCheck() {
-
-
-  //transmit_data=B00000010;
-  //Tx();
 
   bool is = true;
 
+  if (digitalRead(proxi1) == LOW && digitalRead(proxi2) == HIGH && digitalRead(proxi3) == HIGH) {
+    prev = millis();
+    is =  true;
+    while ( millis() - prev < check_timer) {
+      if (!(digitalRead(proxi1) == LOW && digitalRead(proxi2) == HIGH && digitalRead(proxi3) == HIGH)) {
+        is = false;
+        break;
+      }
+    }
+    if (is) {
+      next = 4;
+      return;
+    }
+  }
 
-
-  if (!digitalRead(arm2)) {
+  if (digitalRead(proxi1) == HIGH && digitalRead(proxi2) == LOW && digitalRead(proxi3) == HIGH) {
     prev = millis();
     is = true;
     while (millis() - prev < check_timer) {
-
-      if (digitalRead(arm2)) {
+      if (!(digitalRead(proxi1) == HIGH && digitalRead(proxi2) == LOW && digitalRead(proxi3) == HIGH)) {
         is = false;
         break;
       }
 
     }
     if (is) {
-      transmit_data = B00000010;
-      Tx();
-      throw_decider = 2;
-      delay(1000);
-      transmit_data = 0;
-      Tx();
+      next = 5;
       return;
     }
 
   }
 
-  if (!digitalRead(arm1)) {
+  if (digitalRead(proxi1) == HIGH && digitalRead(proxi2) == HIGH && digitalRead(proxi3) == LOW) {
     prev = millis();
     is = true;
     while (millis() - prev < check_timer) {
-
-      if (digitalRead(arm1)) {
-        is = false;
-        break;
-      }
-    }
-    if (is) {
-      transmit_data = B00000001;
-      throw_decider = 1;
-      Tx();
-      delay(1000);
-      transmit_data = 0;
-      Tx();
-      return;
-    }
-  }
-
-  if (!digitalRead(arm3)) {
-    prev = millis();
-    is = true;
-    while (millis() - prev < check_timer) {
-
-      if (digitalRead(arm3)) {
+      if (!(digitalRead(proxi1) == HIGH && digitalRead(proxi2) == HIGH && digitalRead(proxi3) == LOW)) {
         is = false;
         break;
       }
 
     }
     if (is) {
-      transmit_data = B00000011;
-      Tx();
-      throw_decider = 3;
-      delay(1000);
-      transmit_data = 0;
-      Tx();
+      next = 6;
       return;
     }
   }
@@ -176,157 +99,163 @@ void armCheck() {
 
 }
 
-void ultrasonic() {
-  transmit_data = 0;
-  Tx();
-  Serial.println(current_ultrasonic);
-
-  if (current_ultrasonic == 0) {
-    Rx();
-    Serial.println(received_data);
-    if (received_data == 0) {
-      return;
-    }
-
-    digitalWrite(trigPinO, LOW);  // Added this line
-    delayMicroseconds(2); // Added this line
-    digitalWrite(trigPinO, HIGH);
-    //  delayMicroseconds(1000); - Removed this line
-    delayMicroseconds(10); // Added this line
-    digitalWrite(trigPinO, LOW);
-    durationO = pulseIn(echoPinO, HIGH);
-    distanceO = (durationO / 2) / 29.1;
-    //    Serial.println(distanceO);
-    while (distanceO < 130) {
-      Rx();
-      if (received_data == 0) {
-        return;
-      }
+void shuttle_throw() {
+  lukluk();
+  lukluk();
+  //  digitalWrite(relay_pins[0], HIGH);
+  //  delay(2000);
+  //  digitalWrite(relay_pins[0], LOW);
 
 
-      digitalWrite(trigPinO, LOW);  // Added this line
-      delayMicroseconds(2); // Added this line
-      digitalWrite(trigPinO, HIGH);
-      //  delayMicroseconds(1000); - Removed this line
-      delayMicroseconds(10); // Added this line
-      digitalWrite(trigPinO, LOW);
-      durationO = pulseIn(echoPinO, HIGH);
-      distanceO = (durationO / 2) / 29.1;
-      //        //     Serial.println("h");
-    }
-    Serial.println("transmitting data ultra");
-    transmit_data = B00000110;
-    Tx();
-    current_ultrasonic = 1;
-  } else {
-    Rx();
-    if (received_data == 0) {
-      return;
-    }
-    durationZ, distanceZ;
-    digitalWrite(trigPinZ, LOW);  // Added this line
-    delayMicroseconds(2); // Added this line
-    digitalWrite(trigPinZ, HIGH);
-    //  delayMicroseconds(1000); - Removed this line
-    delayMicroseconds(10); // Added this line
-    digitalWrite(trigPinZ, LOW);
-    durationZ = pulseIn(echoPinZ, HIGH);
-    distanceZ = (durationZ / 2) / 29.1;
-    while (distanceZ < 130) {
-      Rx();
-      if (received_data == 0) {
-        return;
-      }
-      durationZ, distanceZ;
-      digitalWrite(trigPinZ, LOW);  // Added this line
-      delayMicroseconds(2); // Added this line
-      digitalWrite(trigPinZ, HIGH);
-      //  delayMicroseconds(1000); - Removed this line
-      delayMicroseconds(10); // Added this line
-      digitalWrite(trigPinZ, LOW);
-      durationZ = pulseIn(echoPinZ, HIGH);
-      distanceZ = (durationZ / 2) / 29.1;
-    }
-    transmit_data = B00000110;
-    Tx();
-    current_ultrasonic = 0;
+  Serial.println("in shuttle throw");
+
+  if ( next == 4) {
+    digitalWrite(relay_pins[0], HIGH);
+    delay(2000);
+    digitalWrite(relay_pins[0], LOW);
   }
-  //    Serial.println(distanceZ);
+  else if (next == 5) {
+    digitalWrite(relay_pins[1], HIGH);
+    delay(2000);
+    digitalWrite(relay_pins[1], LOW);
+  }
+  else if ( next == 6) {
+
+    digitalWrite(relay_pins[2], HIGH);
+    delay(2000);
+    digitalWrite(relay_pins[2], LOW);
+  }
+
+
+  //  delay(1000);
 }
 
-void send_zero() {
-  transmit_data = 0;
-  Tx();
+void short_proxi() {
 
+
+
+  if (!digitalRead(proxi1)) {
+    digitalWrite(arm1, 1);
+
+  }
+  else digitalWrite(arm1, 0);
+
+  if (!digitalRead(proxi2)) {
+    digitalWrite(arm2, 1);
+
+  }
+  else digitalWrite(arm2, 0);
+
+  if (!digitalRead(proxi3)) {
+    digitalWrite(arm3, 1);
+
+  }
+
+  else digitalWrite(arm3, 0);
 }
+
+void ultrasonic_out() {
+
+
+  durationO, distanceO;
+  digitalWrite(trigPinO, LOW);  // Added this line
+  delayMicroseconds(2); // Added this line
+  digitalWrite(trigPinO, HIGH);
+  //  delayMicroseconds(1000); - Removed this line
+  delayMicroseconds(10); // Added this line
+  digitalWrite(trigPinO, LOW);
+  durationO = pulseIn(echoPinO, HIGH);
+  distanceO = (durationO / 2) / 29.1;
+  //  Serial.println(distanceO);
+  if (distanceO >= 200 ) {
+    digitalWrite(ultra_out, HIGH);
+    //     Serial.println("h");
+  }
+  else {
+    digitalWrite(ultra_out, LOW);
+    //     Serial.println("l");
+  }
+}
+//void ultrasonic_zone() {
+//  durationZ, distanceZ;
+//  digitalWrite(trigPinZ, LOW);  // Added this line
+//  delayMicroseconds(2); // Added this line
+//  digitalWrite(trigPinZ, HIGH);
+//  //  delayMicroseconds(1000); - Removed this line
+//  delayMicroseconds(10); // Added this line
+//  digitalWrite(trigPinZ, LOW);
+//  durationZ = pulseIn(echoPinZ, HIGH);
+//  distanceZ = (durationZ / 2) / 29.1;
+//  Serial.println("h");
+//
+//  Serial.println(distanceZ);
+//  if (distanceZ >= 130) {
+//    digitalWrite(ultra_zone, HIGH);
+//  }
+//  else {
+//    digitalWrite(ultra_zone, LOW);
+//    //         Serial.println("l");
+//  }
+//}
+
 
 void setup() {
-
   // put your setup code here, to run once:
-  pinMode(arm1, INPUT);
-  pinMode(arm2, INPUT);
-  pinMode(arm3, INPUT);
+  pinMode(proxi1, INPUT);
+  pinMode(proxi2, INPUT);
+  pinMode(proxi3, INPUT);
+  pinMode(arm1, OUTPUT);
+  pinMode(arm2, OUTPUT);
+  pinMode(arm3, OUTPUT);
+  pinMode(ultra_out, OUTPUT);
+  pinMode(check_proxi, INPUT);
   pinMode(trigPinO, OUTPUT);
   pinMode(echoPinO, INPUT);
   pinMode(trigPinZ, OUTPUT);
   pinMode(echoPinZ, INPUT);
-  for (int i = 0; i < 2; i++) {
-    pinMode(read_pins[i], INPUT);
+  pinMode(start_ultra, INPUT);
+  pinMode(shuttle_pin, INPUT);
+  digitalWrite(ultra_out, LOW);
+
+  for (int i = 0; i < 3; i++) {
+    pinMode(relay_pins[i], OUTPUT);
   }
 
-  for (int i = 0; i < 4; i++) {
-    pinMode(write_pins[i], OUTPUT);
-  }
+
   Serial.begin(9600);
-  transmit_data = 0;
-//  Tx();
+
 }
 
+bool thrown = false;
+
 void loop() {
-  while(1){
-    digitalWrite(trigPinO, LOW);  // Added this line
-    delayMicroseconds(2); // Added this line
-    digitalWrite(trigPinO, HIGH);
-    //  delayMicroseconds(1000); - Removed this line
-    delayMicroseconds(10); // Added this line
-    digitalWrite(trigPinO, LOW);
-    durationO = pulseIn(echoPinO, HIGH);
-    distanceO = (durationO / 2) / 29.1;
-    Serial.println(distanceO);
+
+  //  Serial.println(digitalRead(start_ultra));
+
+  if (digitalRead(start_ultra) == HIGH) {
+    ultrasonic_out();
   }
-  //  while(1){
-//      Serial.println(digitalRead(arm1));
-  //    Serial.println(digitalRead(arm2));
-  //    Serial.println(digitalRead(arm3));
-  //
-  //  }
 
-
-  //     while (1) {
-  //    Rx();
-  //    Serial.println(received_data);
-  //  }
-
-
-//  send_zero();
-  Rx();
-  Serial.println("data in loop");
-  Serial.println(received_data);
-  if (received_data == B00000010) {
-    //    Serial.println("received from mother");
+  if (digitalRead(check_proxi) == HIGH) {
     armCheck();
   }
 
-  if (received_data == B00000001) {
-    shuttle_throw();
-  }
+  short_proxi();
 
-  if (received_data == B00000011) {
-    Serial.println(received_data);
-    ultrasonic();
-    Serial.println("after ultra");
+
+  if (digitalRead(shuttle_pin) == HIGH) {
+
+    if (thrown == false) {
+
+      shuttle_throw();
+      thrown = true;
+    }
+
+  }
+  else {
+    thrown = false;
+
   }
 
 }
-
 
