@@ -34,9 +34,12 @@ void Rx() {
 }
 
 void Tx() {
+  Serial.println("transmitting data in tx");
   for (int i = 0; i < 4; i++) {
     digitalWrite(write_pins[i], bitRead(transmit_data, i));
+    Serial.print( bitRead(transmit_data, i));
   }
+  Serial.println();
 }
 
 void lukluk() {
@@ -64,6 +67,9 @@ void lukluk() {
 void shuttle_throw() {
   lukluk();
   lukluk();
+  Serial.println("in shuttle throw");
+  Serial.println("throw_decider");
+  Serial.println(throw_decider);
 
   if (throw_decider = 1) {
     digitalWrite(relayPin[0], HIGH);
@@ -83,12 +89,19 @@ void shuttle_throw() {
 
   transmit_data = B00001000;
   Tx();
+  Serial.println("shuttle throw completed");
+  Serial.println(transmit_data);
+
   transmit_data = B00000000;
   Tx();
   //  delay(1000);
 }
 
 void armCheck() {
+
+
+  //transmit_data=B00000010;
+  //Tx();
 
   bool is = true;
 
@@ -166,7 +179,14 @@ void armCheck() {
 void ultrasonic() {
   transmit_data = 0;
   Tx();
+  Serial.println(current_ultrasonic);
+
   if (current_ultrasonic == 0) {
+    Rx();
+    Serial.println(received_data);
+    if (received_data == 0) {
+      return;
+    }
 
     digitalWrite(trigPinO, LOW);  // Added this line
     delayMicroseconds(2); // Added this line
@@ -178,6 +198,11 @@ void ultrasonic() {
     distanceO = (durationO / 2) / 29.1;
     //    Serial.println(distanceO);
     while (distanceO < 130) {
+      Rx();
+      if (received_data == 0) {
+        return;
+      }
+
 
       digitalWrite(trigPinO, LOW);  // Added this line
       delayMicroseconds(2); // Added this line
@@ -189,10 +214,15 @@ void ultrasonic() {
       distanceO = (durationO / 2) / 29.1;
       //        //     Serial.println("h");
     }
+    Serial.println("transmitting data ultra");
     transmit_data = B00000110;
     Tx();
     current_ultrasonic = 1;
   } else {
+    Rx();
+    if (received_data == 0) {
+      return;
+    }
     durationZ, distanceZ;
     digitalWrite(trigPinZ, LOW);  // Added this line
     delayMicroseconds(2); // Added this line
@@ -203,6 +233,10 @@ void ultrasonic() {
     durationZ = pulseIn(echoPinZ, HIGH);
     distanceZ = (durationZ / 2) / 29.1;
     while (distanceZ < 130) {
+      Rx();
+      if (received_data == 0) {
+        return;
+      }
       durationZ, distanceZ;
       digitalWrite(trigPinZ, LOW);  // Added this line
       delayMicroseconds(2); // Added this line
@@ -220,6 +254,12 @@ void ultrasonic() {
   //    Serial.println(distanceZ);
 }
 
+void send_zero() {
+  transmit_data = 0;
+  Tx();
+
+}
+
 void setup() {
 
   // put your setup code here, to run once:
@@ -235,30 +275,45 @@ void setup() {
   }
 
   for (int i = 0; i < 4; i++) {
-    pinMode(write_pins[i],OUTPUT);
+    pinMode(write_pins[i], OUTPUT);
   }
   Serial.begin(9600);
-transmit_data=0;
-Tx();
+  transmit_data = 0;
+//  Tx();
 }
 
 void loop() {
-//  while(1){
-//    Serial.println(digitalRead(arm1));
-//    Serial.println(digitalRead(arm2));
-//    Serial.println(digitalRead(arm3));
-//    
-//  }
-while(1){
-  transmit_data=counter;
-counter++;
+  while(1){
+    digitalWrite(trigPinO, LOW);  // Added this line
+    delayMicroseconds(2); // Added this line
+    digitalWrite(trigPinO, HIGH);
+    //  delayMicroseconds(1000); - Removed this line
+    delayMicroseconds(10); // Added this line
+    digitalWrite(trigPinO, LOW);
+    durationO = pulseIn(echoPinO, HIGH);
+    distanceO = (durationO / 2) / 29.1;
+    Serial.println(distanceO);
+  }
+  //  while(1){
+//      Serial.println(digitalRead(arm1));
+  //    Serial.println(digitalRead(arm2));
+  //    Serial.println(digitalRead(arm3));
+  //
+  //  }
 
- Tx();
- delay(1000);}
+
+  //     while (1) {
+  //    Rx();
+  //    Serial.println(received_data);
+  //  }
+
+
+//  send_zero();
   Rx();
+  Serial.println("data in loop");
   Serial.println(received_data);
   if (received_data == B00000010) {
-//    Serial.println("received from mother");
+    //    Serial.println("received from mother");
     armCheck();
   }
 
@@ -267,8 +322,9 @@ counter++;
   }
 
   if (received_data == B00000011) {
-//Serial.println(received_data);
+    Serial.println(received_data);
     ultrasonic();
+    Serial.println("after ultra");
   }
 
 }
