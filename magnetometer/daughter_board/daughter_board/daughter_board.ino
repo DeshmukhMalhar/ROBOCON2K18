@@ -1,3 +1,6 @@
+
+
+
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_NeoPixel.h>
 #define trigPinO 52
@@ -20,8 +23,26 @@ int current = 1, next = 1;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 int counter = 0;
 unsigned long current_millis, interval, prev;
+int cytron1_pins[]={6},cytron2_pins[]={29,31,33,35,37,39,41,43};
 int check_timer = 1000;
 int relay_pins[] = {47, 49, 51};
+LiquidCrystal_I2C lcd(0x26,20,4);
+
+void printCytron(){
+lcd.setCursor(0,0);
+for(int i=0;i<1;i++){
+  lcd.print(digitalRead(cytron1_pins[i]));
+  Serial.println("Cytron1");
+  Serial.print(digitalRead(cytron1_pins[i]));
+  
+}
+lcd.setCursor(0,1);
+for(int i=0;i<8;i++){
+  lcd.print(digitalRead(cytron2_pins[i]));
+  
+}
+ 
+}
 void lukluk() {
   while (counter != 2) {
     for (int i = 0; i < 5; i++) {
@@ -201,6 +222,8 @@ void ultrasonic_out() {
 
 void setup() {
   // put your setup code here, to run once:
+  lcd.init();
+   lcd.backlight();
   pinMode(proxi1, INPUT);
   pinMode(proxi2, INPUT);
   pinMode(proxi3, INPUT);
@@ -221,7 +244,14 @@ void setup() {
     pinMode(relay_pins[i], OUTPUT);
   }
 
-
+for (int i=0;i<8;i++){
+  pinMode(cytron1_pins[i],INPUT);
+  
+}
+for (int i=0;i<8;i++){
+  pinMode(cytron2_pins[i],INPUT);
+  
+}
   Serial.begin(9600);
 
 }
@@ -229,6 +259,9 @@ void setup() {
 bool thrown = false;
 
 void loop() {
+
+printCytron();
+
 
   //  Serial.println(digitalRead(start_ultra));
 

@@ -17,6 +17,9 @@
 #define check_proxi 18
 #define shuttle_pin 19
 #define start_ultra 50
+#define TZ1SW 22
+#define TZ2SW 25
+#define TZ3SW 27
 #include <Wire.h>
 
 
@@ -33,7 +36,7 @@ float  minimum, maximum, variable, headingDegrees;
 float heading, declinationAngle;
 uint8_t velocity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 int temp_normal = 100;
-int lowest=45,low = 55, medium = 65, high = 80, normal = 120, lower_speed = 60, higher_speed = 150;
+int lowest = 47, low = 57, medium = 67, high = 82, normal = 124, lower_speed = 64, higher_speed = 154;
 
 uint8_t threshold ;
 //uint8_t relayPin[] = {23, 25, 27}; //23 tz1; 25 tz2 ; 27 tz3
@@ -42,7 +45,7 @@ int junction_counter = 0;
 bool flag = false;
 bool junction = false;
 
-uint8_t current = 1, next = 0;
+uint8_t current = 1, next = 2;
 uint8_t mz1, mz2, mz3, mz4;
 uint8_t mo1, mo2, mo3, mo4;
 unsigned long current_millis, interval, prev;
@@ -61,6 +64,7 @@ void shuttle_throw() {
 
 }
 void armCheck() {
+
 
   digitalWrite(check_proxi, HIGH);
 
@@ -808,11 +812,14 @@ void calibrate_magnetometer() {
 //  flag = !flag;
 //}
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
   // put your setup code here, to run once:
   initt();
   //  attachInterrupt(digitalPinToInterrupt(interrupt_pin),ISR,HIGH);
   //  pinMode(22, OUTPUT);
+  pinMode(TZ1SW, INPUT);
+  pinMode(TZ2SW, INPUT);
+  pinMode(TZ3SW, INPUT);
   pinMode(arm1, INPUT);
   pinMode(arm2, INPUT);
   pinMode(arm3, INPUT);
@@ -849,7 +856,9 @@ void setup() {
   //  displaySensorDetails();
 
   calibrate_magnetometer();
-
+if(digitalRead(TZ1SW)==HIGH){
+  higher_speed=90;
+}
   ////Serial.println("Done");
 
 }
@@ -875,12 +884,33 @@ void loop() {
   //shuttle_throw();
   //while(1);
   armCheck();
+//  Serial.println(next);
 
-
+//if(digitalRead(TZ1SW)==HIGH){
+//  higher_speed=100;
+//}
 
   if (current == 1 && next == 2) {
     //Serial.println("c1 n2");
-    normal = higher_speed + 50;
+    normal = 86;
+    left();
+    adj_zone();
+    while (!junction) {
+      adj_zone();
+
+    }
+    while (junction) {
+      adj_zone();
+    }
+    while ((PINL | B00011100) == B11111100) {
+      adj_zone();
+    }
+    while (PINL != 0) {
+      adj_zone();
+    }
+    stop1();
+
+    normal = higher_speed;
     threshold = 240 - constant - normal;
     forward();
     adj_out();
@@ -888,13 +918,13 @@ void loop() {
 
     while (junction != true) {
 
-      if (digitalRead(17)) {
-        //                        stop1();
-        normal = 50;
-        forward_slow();
-        threshold = 240 - constant - normal;
-
-      }
+      //    if (digitalRead(17)) {
+      //        //                        stop1();
+      //        normal = 50;
+      //        forward_slow();
+      //        threshold = 240 - constant - normal;
+      //
+      //      }
       adj_out();
 
     }
@@ -904,14 +934,37 @@ void loop() {
     ////Serial.println("After juntion");
     //      while(1);
     stop1();
+    normal = 65;
+    backward();
+    adj_out();
+    while (!junction) {
+      adj_out();
+    }
+    while (junction) {
+      adj_out();
+    }
+    stop1();
+    //    adj_out();
+    normal = 60;
+    forward();
+    adj_out();
+    while (!junction) {
+      adj_out();
+    }
+    adj_out();
+    while (junction) {
+      adj_out();
+    }
+    stop1();
     current = 2;
-    next = 4;
+    armCheck();
     junction_counter = 0;
-    normal = higher_speed + 50;
+    normal = higher_speed;
 
   } else if (current == 2 && next == 4) {
     //////Serial.println("c1 n2");
-    //    normal = lower_speed;
+        normal = higher_speed;
+    
     threshold = 240 - constant - normal;
     adj_zone();
 
@@ -955,6 +1008,16 @@ void loop() {
       adj_zone();
 
     }
+    while (junction) {
+      adj_zone();
+    }
+    adj_zone();
+    stop1();
+    right();
+    while (!junction) {
+      adj_zone();
+    }
+
     normal = higher_speed;
     stop1();
     shuttle_throw();
@@ -995,6 +1058,17 @@ void loop() {
     while (junction_counter != 2) {
       adj_zone();
     }
+    while (junction) {
+      adj_zone();
+    }
+    stop1();
+    normal = lower_speed;
+    left();
+    adj_zone();
+    while (!junction) {
+      adj_zone();
+    }
+
     stop1();
     //    while (1);
     current = 2;
@@ -1099,7 +1173,7 @@ void loop() {
     velocity[3] = 0;
     velocity[6] = 0;
     velocity[7] = 0;
-    delay(500);
+//    delay(500);
     left();
     adj_zone();
     while (junction == false) {
@@ -1145,7 +1219,7 @@ void loop() {
     while (junction_counter != 4) {
       adj_zone();
     }
-    normal = temp_normal;
+    normal = temp_normal - 20;
     right();
     while (junction_counter != 5) {
       adj_zone();
@@ -1224,6 +1298,18 @@ void loop() {
       adj_zone();
 
     }
+
+    normal = lower_speed;
+    adj_zone();
+    while (junction) {
+      adj_zone();
+    }
+    adj_zone();
+    right();
+    while (!junction) {
+      adj_zone();
+    }
+
     normal = higher_speed;
     stop1();
     shuttle_throw();
@@ -1291,6 +1377,16 @@ void loop() {
       adj_zone();
 
     }
+
+    while (junction) {
+      adj_zone();
+    }
+    adj_zone();
+    right();
+    while (!junction) {
+      adj_zone();
+    }
+
     normal = higher_speed;
     stop1();
     shuttle_throw();
@@ -1376,6 +1472,7 @@ void loop() {
   }
   else if (current == 1 && next == 4) {
     digitalWrite(start_ultra, HIGH);
+
 
     normal = higher_speed;
     threshold = 240 - constant - normal;
@@ -1547,6 +1644,16 @@ void loop() {
       adj_zone();
 
     }
+    adj_zone();
+    normal = lower_speed;
+    while (junction) {
+      adj_zone();
+    }
+    adj_zone();
+    right();
+    while (!junction) {
+      adj_zone();
+    }
     stop1();
     shuttle_throw();
     normal = higher_speed;
@@ -1637,6 +1744,15 @@ void loop() {
       adj_zone();
 
     }
+    while (junction) {
+      adj_zone();
+    }
+    adj_zone();
+    right();
+
+    while (!junction) {
+      adj_zone();
+    }
     stop1();
     shuttle_throw();
     normal = higher_speed;
@@ -1686,7 +1802,17 @@ void loop() {
     next = 2;
     armCheck();
   }
+
+  else if ((current == 6 && next == 6) || (current == 5 && next == 5)) {
+    next = 3;
+
+
+  }
+  else if (current == 4 && next == 4) {
+    next = 2;
+  }
 }
+
 
 
 
