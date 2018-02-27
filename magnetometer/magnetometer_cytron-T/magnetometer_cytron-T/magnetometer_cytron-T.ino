@@ -856,9 +856,7 @@ void setup() {
   //  displaySensorDetails();
 
   calibrate_magnetometer();
-if(digitalRead(TZ1SW)==HIGH){
-  higher_speed=90;
-}
+
   ////Serial.println("Done");
 
 }
@@ -884,11 +882,9 @@ void loop() {
   //shuttle_throw();
   //while(1);
   armCheck();
-//  Serial.println(next);
+  Serial.println(next);
 
-//if(digitalRead(TZ1SW)==HIGH){
-//  higher_speed=100;
-//}
+
 
   if (current == 1 && next == 2) {
     //Serial.println("c1 n2");
